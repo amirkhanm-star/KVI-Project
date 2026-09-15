@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KPL Value Index — сезон 2026</title>
+<style>
+:root{
+  --bg:#0B0E14; --bg-2:#12161F; --card:#1A202C; --card-2:#212936;
+  --line:#2D3748; --line-2:#3A465A; --line-soft:#232B39;
+  --tx:#E6EAF0; --tx-2:#AEB9C8; --tx-3:#7C8899; --tx-4:#5A6676;
+  --pos:#3FBF7F; --pos-dim:#1F7A4F; --pos-bg:rgba(63,191,127,.12);
+  --neg:#F0645B; --neg-bg:rgba(240,100,91,.13);
+  --warn:#E0A33E; --warn-bg:rgba(224,163,62,.13);
+  --ntr:#7C8899; --ntr-bg:rgba(124,136,153,.14);
+  --accent:#3FBF7F;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:SFMono-Regular,ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  --t:140ms cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  font-family:var(--sans); color:var(--tx); font-size:13px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums;
+  overflow-x:hidden;
+}
+.num,table,.fig .v,.kv b,.srow .v{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.shell{max-width:1560px;margin:0 auto;padding:0 20px 64px}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--pos);text-decoration:none}
+a:hover{text-decoration:underline}
+::selection{background:rgba(63,191,127,.28)}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:var(--bg-2)}
+::-webkit-scrollbar-thumb{background:var(--line);border:3px solid var(--bg-2);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--line-2)}
+
+/* ── masthead ── */
+.masthead{border-bottom:1px solid var(--line);background:var(--bg-2);position:sticky;top:0;z-index:60}
+.mh{max-width:1560px;margin:0 auto;padding:11px 20px;display:flex;align-items:flex-end;gap:26px}
+.brand .t{font-size:16px;font-weight:620;letter-spacing:-.015em;line-height:1.15}
+.brand .t i{color:var(--pos);font-style:normal}
+.brand .s{font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--tx-4);font-weight:600;margin-top:2px}
+.mh-figs{margin-left:auto;display:flex;align-items:stretch;border-left:1px solid var(--line)}
+.fig{padding:0 15px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:flex-end;min-width:76px}
+.fig:last-child{border-right:0;padding-right:0}
+.fig .k{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--tx-4);font-weight:600;white-space:nowrap}
+.fig .v{font-family:var(--mono);font-size:15px;font-weight:600;line-height:1.2;letter-spacing:-.02em;color:var(--tx)}
+.fig .v small{font-size:9.5px;color:var(--tx-4);font-weight:500;margin-left:3px;letter-spacing:0}
+.fig.hi .v{color:var(--pos)}
+
+/* ── notice ── */
+.notice{border-bottom:1px solid var(--line);background:var(--bg)}
+.notice .in{max-width:1560px;margin:0 auto;padding:7px 20px;font-size:11px;color:var(--tx-3);display:flex;gap:8px}
+.notice b{color:var(--warn);font-weight:600}
+
+/* ── controls ── */
+.controls{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-top:0;background:var(--card)}
+.ctl{display:flex;flex-direction:column;gap:4px;padding:9px 13px;border-right:1px solid var(--line);justify-content:center}
+.ctl:last-child{border-right:0}
+.ctl label{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--tx-4);font-weight:600}
+.ctl input[type=text],.ctl select{
+  border:1px solid var(--line-2);background:var(--bg-2);color:var(--tx);padding:4px 8px;
+  border-radius:3px;font-size:12.5px;min-width:136px;height:27px;transition:border-color var(--t),background var(--t);
+}
+.ctl input[type=text]::placeholder{color:var(--tx-4)}
+.ctl input[type=text]:focus,.ctl select:focus{outline:none;border-color:var(--pos);background:var(--bg)}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:3px;overflow:hidden;height:27px}
+.seg button{
+  border:0;background:var(--bg-2);padding:0 12px;font-size:12px;cursor:pointer;color:var(--tx-3);
+  border-right:1px solid var(--line);font-weight:550;transition:background var(--t),color var(--t);
+}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--pos);color:#07130D;font-weight:650}
+.seg button:hover:not([aria-pressed=true]){background:var(--card-2);color:var(--tx)}
+.rng{display:flex;align-items:center;gap:8px}
+.rng input[type=range]{width:108px;accent-color:var(--pos);background:transparent}
+.rng .out{font-family:var(--mono);font-size:11.5px;color:var(--tx-2);min-width:78px}
+.ctl.push{margin-left:auto;border-right:0;border-left:1px solid var(--line)}
+.btn{
+  border:1px solid var(--line-2);background:var(--bg-2);height:27px;padding:0 13px;border-radius:3px;
+  cursor:pointer;font-size:12px;font-weight:550;color:var(--tx-2);
+  transition:background var(--t),color var(--t),border-color var(--t);
+}
+.btn:hover{background:var(--card-2);color:var(--tx);border-color:var(--line-2)}
+.btn[aria-pressed=true]{background:var(--pos);color:#07130D;border-color:var(--pos);font-weight:650}
+.btn.ghost{border-color:transparent;color:var(--tx-4)}
+.btn.ghost:hover{border-color:var(--line-2);color:var(--tx-2)}
+/* ── layout ── */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 336px;border:1px solid var(--line);border-top:0}
+.pane{border-right:1px solid var(--line);min-width:0;background:var(--card)}
+.pane:last-child{border-right:0}
+.phead{display:flex;align-items:baseline;gap:10px;padding:9px 13px;border-bottom:1px solid var(--line);background:var(--bg-2)}
+.phead h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:650;color:var(--tx-2)}
+.phead .sub{font-size:10.5px;color:var(--tx-4)}
+.phead .right{margin-left:auto;font-size:10.5px;color:var(--tx-3);font-family:var(--mono)}
+.pbody{padding:12px 13px}
+
+/* ── scatter ── */
+#scatter,#dist,#radar{display:block;width:100%;height:auto}
+.gridline{stroke:var(--line-soft);stroke-width:1}
+.gridline.zero{stroke:var(--line-2)}
+.axlab{font-size:10px;fill:var(--tx-4);font-family:var(--mono)}
+.axtitle{font-size:9.5px;fill:var(--tx-4);font-weight:600;letter-spacing:.09em;text-transform:uppercase}
+.quad{fill:var(--pos);opacity:.07}
+.quadline{stroke:var(--pos);stroke-width:1;stroke-dasharray:3 3;opacity:.35}
+.quadlab{font-size:9.5px;fill:var(--pos);font-weight:650;letter-spacing:.09em;text-transform:uppercase;opacity:.85}
+.pt{cursor:pointer}
+.pt circle{stroke:var(--bg);stroke-width:.7;transition:opacity var(--t)}
+.pt:hover circle{stroke:var(--tx);stroke-width:1.6}
+.pt.dim circle{opacity:.08}
+.pt.sel circle{stroke:var(--tx);stroke-width:2.2}
+.ptlab{font-size:10px;fill:var(--tx-2);font-weight:600;pointer-events:none}
+.ptlab.halo{stroke:var(--bg);stroke-width:3.4;stroke-linejoin:round;paint-order:stroke}
+.trend{stroke:var(--tx-3);stroke-width:1.2;stroke-dasharray:5 4;opacity:.75}
+
+/* ── tooltip ── */
+#tip{
+  position:fixed;pointer-events:none;z-index:300;background:var(--card-2);color:var(--tx);
+  border:1px solid var(--line-2);padding:8px 10px;border-radius:4px;font-size:11.5px;line-height:1.45;
+  max-width:260px;opacity:0;transform:translateY(3px);transition:opacity var(--t),transform var(--t);
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+#tip.on{opacity:1;transform:translateY(0)}
+#tip .n{font-weight:650;margin-bottom:3px;font-size:12.5px}
+#tip .sub{color:var(--tx-4);font-size:10.5px;margin-bottom:5px}
+#tip .r{display:flex;justify-content:space-between;gap:16px;color:var(--tx-3)}
+#tip .r b{color:var(--tx);font-family:var(--mono);font-weight:600}
+
+/* ── stat rows ── */
+.srow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line-soft)}
+.srow:last-child{border-bottom:0}
+.srow .k{font-size:11.5px;color:var(--tx-3)}
+.srow .v{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--tx)}
+.catrow{display:grid;grid-template-columns:116px 1fr 30px;gap:8px;align-items:center;padding:3.5px 0}
+.catrow .cl{font-size:11px;color:var(--tx-2)}
+.catrow .cb{height:9px;background:var(--bg-2);position:relative;overflow:hidden;border-radius:1px}
+.catrow .cb i{display:block;height:100%;transition:width var(--t)}
+.catrow .cn{font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--tx-2)}
+.cov{display:grid;grid-template-columns:30px 1fr 42px;gap:8px;align-items:center;padding:4px 0}
+.cov .g{font-family:var(--mono);font-size:11.5px;font-weight:650;color:var(--tx-2)}
+.cov .track{height:11px;background:var(--bg-2);position:relative;border-radius:1px;overflow:hidden}
+.cov .track i{display:block;height:100%;background:var(--pos-dim)}
+.cov .track u{position:absolute;top:0;right:0;height:100%;
+  background:repeating-linear-gradient(135deg,var(--neg-bg) 0 4px,transparent 4px 8px)}
+.cov .p{font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--tx-2)}
+
+/* ── table ── */
+.tblwrap{border:1px solid var(--line);border-top:0;overflow:auto;max-height:540px;background:var(--card)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
+thead th{
+  position:sticky;top:0;z-index:5;background:var(--bg-2);border-bottom:1px solid var(--line-2);
+  padding:7px 9px;text-align:left;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--tx-4);font-weight:650;white-space:nowrap;cursor:pointer;user-select:none;
+  transition:color var(--t),background var(--t);
+}
+thead th:hover{background:var(--card-2);color:var(--tx)}
+thead th.r{text-align:right}
+thead th .ar{color:var(--pos);margin-left:3px}
+tbody td{padding:5px 9px;border-bottom:1px solid var(--line-soft);white-space:nowrap;color:var(--tx-2)}
+tbody td.r{text-align:right;font-family:var(--mono);color:var(--tx)}
+tbody tr{cursor:pointer;transition:background var(--t)}
+tbody tr:hover td{background:var(--card-2)}
+tbody tr.sel td{background:rgba(63,191,127,.1)}
+tbody tr.out td{color:var(--tx-4)}
+tbody tr.out td.r{color:var(--tx-4)}
+.pill{display:inline-block;padding:1.5px 7px;border-radius:3px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.pill.pos{background:var(--pos-bg);color:var(--pos);border:1px solid rgba(63,191,127,.3)}
+.pill.neg{background:var(--neg-bg);color:var(--neg);border:1px solid rgba(240,100,91,.3)}
+.pill.wrn{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(224,163,62,.3)}
+.pill.ntr{background:var(--ntr-bg);color:var(--tx-3);border:1px solid var(--line-2)}
+.tag{display:inline-block;padding:0 5px;border:1px solid var(--line-2);border-radius:3px;
+  font-size:10px;color:var(--tx-3);font-family:var(--mono)}
+
+/* ── drawer ── */
+#scrim{position:fixed;inset:0;background:rgba(5,8,13,.66);opacity:0;visibility:hidden;
+  transition:opacity var(--t),visibility var(--t);z-index:150}
+#scrim.on{opacity:1;visibility:visible}
+#drawer{
+  position:fixed;top:0;right:0;bottom:0;width:560px;max-width:96vw;background:var(--bg-2);
+  border-left:1px solid var(--line-2);z-index:200;transform:translateX(100%);
+  transition:transform 180ms cubic-bezier(.4,0,.2,1);overflow-y:auto;
+  box-shadow:-16px 0 48px rgba(0,0,0,.55);
+}
+#drawer.on{transform:translateX(0)}
+#drawer.wide{width:1040px}
+.dclose{position:absolute;top:11px;right:12px;width:26px;height:26px;border:1px solid var(--line-2);
+  background:var(--card);color:var(--tx-3);border-radius:3px;cursor:pointer;line-height:1;
+  font-size:15px;transition:all var(--t)}
+.dclose:hover{background:var(--neg-bg);color:var(--neg);border-color:var(--neg)}
+.dhead{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--card)}
+.dhead .nm{font-size:18px;font-weight:650;letter-spacing:-.015em;line-height:1.2;padding-right:32px}
+.dhead .mt{font-size:11.5px;color:var(--tx-3);margin-top:4px}
+.dhead .row{display:flex;align-items:flex-end;gap:14px;margin-top:11px}
+.dhead .uiv{font-family:var(--mono);font-size:27px;font-weight:650;line-height:1;letter-spacing:-.03em}
+.dhead .uik{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--tx-4);font-weight:600;margin-bottom:3px}
+.dsec{padding:12px 16px;border-bottom:1px solid var(--line)}
+.dsec>h3{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--tx-4);font-weight:650;margin-bottom:9px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:3.5px 0;font-size:12px;border-bottom:1px solid var(--line-soft)}
+.kv span{color:var(--tx-3)}
+.kv b{font-family:var(--mono);font-weight:600;color:var(--tx)}
+.kv i{font-size:10px;color:var(--tx-4);margin-left:5px;font-style:normal}
+.kv i.up{color:var(--pos)} .kv i.dn{color:var(--neg)}
+.dbar{display:grid;grid-template-columns:132px 1fr 60px;gap:9px;align-items:center;padding:2.5px 0}
+.dbar .l{font-size:11px;color:var(--tx-2)}
+.dbar .ax{position:relative;height:13px;background:var(--bg);border-radius:1px}
+.dbar .ax .mid{position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--line-2)}
+.dbar .ax i{position:absolute;top:2px;bottom:2px;border-radius:1px;transition:all 180ms cubic-bezier(.4,0,.2,1)}
+.dbar .v{font-family:var(--mono);font-size:11px;text-align:right;color:var(--tx)}
+.dbar.tot{border-top:1px solid var(--line);margin-top:6px;padding-top:7px}
+.dbar.tot .l,.dbar.tot .v{font-weight:650}
+.radarwrap{display:flex;gap:14px;align-items:center}
+.radarwrap svg{flex:0 0 232px}
+.rlegend{font-size:10.5px;color:var(--tx-3);line-height:1.7}
+.rlegend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.rax{stroke:var(--line-soft);stroke-width:1}
+.rring{fill:none;stroke:var(--line-soft);stroke-width:1}
+.rring.base{stroke:var(--line-2);stroke-dasharray:3 3}
+.rpoly{fill:rgba(63,191,127,.17);stroke:var(--pos);stroke-width:1.6;stroke-linejoin:round}
+.rdot{fill:var(--pos)}
+.rlab{font-size:9px;fill:var(--tx-4);font-weight:600}
+.rlab.na{fill:var(--tx-4);opacity:.45}
+.empty{padding:40px 16px;color:var(--tx-4);font-size:12.5px;text-align:center}
+.cmpgrid{display:grid;grid-template-columns:1fr 1fr}
+.cmpgrid>div{border-right:1px solid var(--line);min-width:0}
+.cmpgrid>div:last-child{border-right:0}
+.foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:10.5px;
+  color:var(--tx-4);display:flex;gap:22px;flex-wrap:wrap}
+@media(max-width:1200px){
+  .grid{grid-template-columns:1fr}
+  .pane{border-right:0;border-bottom:1px solid var(--line)}
+  #drawer.wide{width:96vw}
+}
+</style>
+</head>
+<body>
+<div id="tip"></div>
+<div id="scrim"></div>
+<aside id="drawer" role="dialog" aria-label="Карточка игрока">
+  <button class="dclose" id="dclose" aria-label="Закрыть">×</button>
+  <div id="dbody"><div class="empty">Игрок не выбран</div></div>
+</aside>
+<header class="masthead">
+  <div class="mh">
+    <div class="brand">
+      <div class="t">KPL <i>Value Index</i></div>
+      <div class="s">Казахстанская Премьер-Лига · сезон 2026</div>
+    </div>
+    <div class="mh-figs">
+      <div class="fig"><span class="k">В модели</span><span class="v" id="f-n">—</span></div>
+      <div class="fig hi"><span class="k">Пирсон r</span><span class="v" id="f-r">—</span></div>
+      <div class="fig"><span class="k">В базе</span><span class="v" id="f-total">—</span></div>
+      <div class="fig"><span class="k">Медиана MV</span><span class="v" id="f-med">—</span></div>
+      <div class="fig"><span class="k">Данные на</span><span class="v" id="f-date">15.09.26</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="notice">
+  <div class="in">
+    <b>Сезон не завершён:</b>
+    <span>сыграно 25 туров из 30. Статистика SofaScore и стоимости Transfermarkt сняты в один день,
+    15.09.2026. Отборы, перехваты, xG и xA источник по КПЛ не публикует — их вес перераспределён,
+    покрытие модели показано справа.</span>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="controls">
+    <div class="ctl"><label for="q">Быстрый поиск</label>
+      <input type="text" id="q" placeholder="имя игрока или клуб" autocomplete="off"></div>
+    <div class="ctl"><label>Позиционная группа</label>
+      <div class="seg" id="seg-grp">
+        <button data-g="ALL" aria-pressed="true">Все</button>
+        <button data-g="FW" aria-pressed="false">FW</button>
+        <button data-g="MF" aria-pressed="false">MF</button>
+        <button data-g="DF" aria-pressed="false">DF</button>
+      </div></div>
+    <div class="ctl"><label for="club">Клуб</label>
+      <select id="club"></select></div>
+    <div class="ctl"><label>Возраст, не старше</label>
+      <div class="rng"><input type="range" id="age" min="17" max="40" value="40">
+        <span class="out" id="age-out">до 40</span></div></div>
+    <div class="ctl"><label>Стоимость, не выше</label>
+      <div class="rng"><input type="range" id="mv" min="0" max="1500000" step="25000" value="1500000">
+        <span class="out" id="mv-out">до 1,50 млн €</span></div></div>
+    <div class="ctl"><label for="cat">Категория UI</label>
+      <select id="cat"></select></div>
+    <div class="ctl push"><label>&nbsp;</label>
+      <div style="display:flex;gap:7px">
+        <button class="btn" id="cmp-btn" aria-pressed="false">Сравнить двух</button>
+        <button class="btn ghost" id="reset">Сбросить фильтры</button>
+      </div></div>
+  </div>
+
+  <div class="grid">
+    <section class="pane">
+      <div class="phead">
+        <h2>Эффективность против стоимости</h2>
+        <span class="sub">клик по точке открывает карточку игрока</span>
+        <span class="right" id="sc-count"></span>
+      </div>
+      <div class="pbody"><svg id="scatter" viewBox="0 0 820 468" role="img"
+        aria-label="Диаграмма рассеяния: эффективность против рыночной стоимости"></svg></div>
+    </section>
+
+    <aside class="pane">
+      <div class="phead"><h2>Выборка</h2><span class="right" id="side-n"></span></div>
+      <div class="pbody">
+        <div class="srow"><span class="k">Корреляция в выборке</span><span class="v" id="s-r">—</span></div>
+        <div class="srow"><span class="k">Наблюдений</span><span class="v" id="s-n">—</span></div>
+        <div class="srow"><span class="k">Медиана KVI_adj</span><span class="v" id="s-kvi">—</span></div>
+        <div class="srow"><span class="k">Медиана стоимости</span><span class="v" id="s-mv">—</span></div>
+        <div class="srow"><span class="k">Средний возраст</span><span class="v" id="s-age">—</span></div>
+      </div>
+      <div class="phead" style="border-top:1px solid var(--line)"><h2>Категории UI</h2></div>
+      <div class="pbody" id="cats"></div>
+      <div class="phead" style="border-top:1px solid var(--line)"><h2>Покрытие модели данными</h2></div>
+      <div class="pbody">
+        <div id="cover"></div>
+        <p style="margin:9px 0 0;font-size:10px;color:var(--tx-4);line-height:1.55">
+          Заштриховано — доля веса KVI, не обеспеченная данными: отборы и перехваты
+          SofaScore по КПЛ не ведёт. Вес перераспределён между собранными показателями,
+          нулём метрика не подменялась.</p>
+      </div>
+      <div class="phead" style="border-top:1px solid var(--line)"><h2>Распределение KVI_adj</h2></div>
+      <div class="pbody"><svg id="dist" viewBox="0 0 310 166" role="img"
+        aria-label="Распределение KVI по позиционным группам"></svg></div>
+    </aside>
+  </div>
+
+  <div class="phead" style="border:1px solid var(--line);border-top:0;margin-top:16px">
+    <h2>Реестр игроков</h2>
+    <span class="sub">клик по строке открывает карточку · клик по заголовку сортирует</span>
+    <span class="right" id="tb-count"></span>
+  </div>
+  <div class="tblwrap">
+    <table id="tbl"><thead><tr id="thr"></tr></thead><tbody id="tb"></tbody></table>
+  </div>
+
+  <div class="foot">
+    <span>Статистика: SofaScore, КПЛ 2026 (season 90730), выгрузка 15.09.2026</span>
+    <span>Стоимости: Transfermarkt, составы 16 клубов, 15.09.2026</span>
+    <span>Все показатели рассчитаны в этом файле по методологии KVI; ни одно значение не захардкожено</span>
+  </div>
+</div>
+<script>
+const FIELDS=["n", "name", "pos", "nat", "club", "age", "dob", "minutes", "apps", "starts", "goals", "assists", "key_passes", "duels_won", "dribbles", "pass_pct", "rating", "mv", "slug", "sf_id", "was_in_base"];
+const ROWS=[[1,"Ivan Bašić","CM","БиГ/ХРВ","FC Astana",24,"2002-04-30",1530,17,17,4,2,23,149,22,91.4,7.48,1500000,"ivan-basic",1049701,1],[2,"Guy-Marcelin Kilama","CB","КАМ","Ordabasy Shymkent",27,"1999-05-30",2070,23,22,2,0,7,195,4,86.88,7.24,1000000,"guy-marcelin-kilama",944222,1],[3,"Jorginho","ST","ПОР","Kairat Almaty",28,"1997-11-09",1684,19,19,8,3,16,137,19,79.91,7.27,1000000,"jorginho",913111,1],[4,"Pablo Álvarez","CDM","ИСП","FC Aktobe",29,"1997-04-23",1506,19,15,1,1,18,81,7,87.1,6.92,1000000,"alvarez-pablo",1009626,1],[5,"Maksat Abraev","LW","КАЗ","FC Astana",18,"2008-02-13",1438,24,17,3,2,14,137,47,79.22,6.9,1000000,"maksat-abraev",1957758,0],[6,"Branimir Kalaica","CB","ХРВ","FC Astana",28,"1998-06-01",1980,22,22,1,0,5,165,3,94.5,7.19,900000,"branimir-kalaica",357586,1],[7,"Rayan Senhadji","CB","АЛЖ/ФРА","Tobol Kostanay",29,"1997-06-13",503,9,5,2,0,1,53,1,86.29,6.91,900000,"rayan-senhadji",845120,0],[8,"Alibek Kasym","CB","КАЗ","FC Astana",28,"1998-05-27",1251,16,14,2,2,4,102,1,91.06,6.84,850000,"alibek-kasym",887312,1],[9,"Aleksa Amanovic","CB","МКД/СРБ","Ordabasy Shymkent",29,"1996-10-24",2250,25,24,0,1,14,157,8,89.21,7.06,800000,"aleksa-amanovic",836897,1],[10,"Temirlan Anarbekov","GK","КАЗ","Kairat Almaty",22,"2003-10-14",2160,24,24,0,0,2,9,0,81.14,7.03,800000,"temirlan-anarbekov",1005884,1],[11,"Daniel Sosah","ST","НИГ/ГАН","FC Aktobe",27,"1998-09-21",1360,16,14,7,0,6,100,11,70.03,7.03,800000,"daniel-sosah",1130110,1],[12,"Artur Shushenachev","ST","КАЗ","FC Aktobe",28,"1998-04-07",2108,24,21,7,2,13,154,30,72.27,7.01,700000,"artur-shushenachev",896335,1],[13,"Oiva Jukkola","LW","ФИН","Kairat Almaty",24,"2002-05-21",1916,24,23,6,4,22,200,63,71.95,7.3,700000,"oiva-jukkola",1049455,1],[14,"Ivan Ordets","CB","УКР","FC Aktobe",34,"1992-07-08",1800,20,20,4,1,3,179,0,89.45,7.26,700000,"ivan-ordets",137673,1],[15,"David Abagna","CM","ГАН","Ordabasy Shymkent",28,"1998-09-09",1711,20,19,2,2,21,143,22,87.3,7.11,700000,"david-abagna",1169364,1],[16,"Luis Guerra","RW","ВЕН","Tobol Kostanay",29,"1996-11-20",1659,24,17,3,3,44,189,47,76.02,7.09,700000,"luis-guerra",790791,1],[17,"Aleksandr Zuev","LW","КАЗ/РОС","Tobol Kostanay",30,"1996-06-26",1383,23,12,3,2,12,98,18,78.84,6.81,700000,"aleksander-zuev",280661,1],[18,"Yuriy Vakulko","CM","УКР","Ordabasy Shymkent",28,"1997-11-10",1105,20,12,0,2,20,82,7,83.88,7.02,700000,"yurii-vakulko",793946,1],[19,"Antonio Boršić","LB","ХРВ","Tobol Kostanay",30,"1995-09-19",662,9,7,0,1,1,39,9,78.97,6.7,700000,"antonio-borsic",886849,0],[20,"Vitaliy Lisakovich","ST","БЛР","Tobol Kostanay",28,"1998-02-08",450,5,5,3,1,6,23,4,76.35,7.28,700000,"lisakovich-vitali",839301,0],[21,"Luís Mata","LB","ПОР","Kairat Almaty",29,"1997-07-06",2160,24,24,3,4,32,139,14,85.65,7.12,600000,"luis-mata",318947,1],[22,"Yan Vorogovskiy","LB","КАЗ","FC Astana",30,"1996-08-07",2160,24,23,2,3,27,219,43,80.94,7.23,600000,"yan-vorogovskiy",842969,1],[23,"Sultanbek Astanov","RB","КАЗ","Ordabasy Shymkent",27,"1999-03-23",2160,24,23,2,2,35,180,25,82.27,7.17,600000,"astanov-sultanbek",986069,1],[24,"Aleksandr Mrynskiy","RB","КАЗ","Kairat Almaty",22,"2004-07-15",2144,24,23,1,1,16,180,34,77.42,6.84,600000,"aleksandr-mrynskiy",1101824,1],[25,"Bekkhan Shayzada","GK","КАЗ","Ordabasy Shymkent",28,"1998-02-28",2070,23,23,0,0,1,9,0,84.94,7.01,600000,"bekkhan-shayzada",987793,1],[26,"Jaakko Oksanen","CM","ФИН","Kairat Almaty",25,"2000-11-07",2042,23,22,2,0,47,171,7,91.04,7.26,600000,"jaakko-oksanen",909506,1],[27,"Mihai Căpățînă","CM","РУМ","Ordabasy Shymkent",30,"1995-12-16",1828,25,19,1,0,9,102,11,85.28,6.99,600000,"mihai-capatina",1085434,1],[28,"Hrvoje Ilić","CAM","ХРВ","Yelimay Semey",27,"1999-04-14",1793,24,22,0,5,31,145,39,79.49,7.06,600000,"hrvoje-ilic",835679,1],[29,"Egor Khvalko","CB","БЛР","FC Atyrau",29,"1997-02-18",1710,19,18,2,0,6,121,2,77.66,7.06,600000,"egor-khvalko",883952,1],[30,"Elkhan Astanov","LW","КАЗ","Ordabasy Shymkent",26,"2000-05-21",1634,22,21,7,5,26,130,43,75.0,7.3,600000,"astanov-elkhan",986359,1],[31,"Ramazan Orazov","CAM","КАЗ","Yelimay Semey",28,"1998-01-30",1440,16,15,3,1,28,93,6,75.05,7.2,600000,"ramazan-orazov",858225,1],[32,"Adilbek Zhumakhanov","CB","КАЗ","Yelimay Semey",23,"2002-12-27",1170,13,13,1,0,5,87,1,83.52,6.84,600000,"adilbek-zhumakhanov",989472,1],[33,"Abdoulaye Cissé","CDM","ГВИ","Tobol Kostanay",30,"1996-02-13",1060,17,10,0,0,4,96,2,88.41,6.68,600000,"abdoulaye-cisse",940100,1],[34,"Jani Atanasov","CDM","МКД/БОЛ","FC Aktobe",26,"1999-10-30",1032,12,11,2,2,4,59,3,85.48,7.17,600000,"jani-atanasov",883475,0],[35,"Kipras Kažukolovas","CB","ЛИТ","FC Astana",25,"2000-11-20",940,12,9,0,1,2,61,1,91.85,6.82,600000,"kipras-kazukolovas",986043,1],[36,"Slobodan Urošević","LB","СРБ","Qyzyljar Petropavlovsk",32,"1994-04-15",683,8,7,1,0,1,47,0,82.97,6.9,600000,"slobodan-urosevic",312170,0],[37,"Pavel Sedko","RM","БЛР","Kaspiy Aktau",28,"1998-04-03",1826,24,23,6,4,30,103,9,74.95,7.09,550000,"pavel-sedko",900983,1],[38,"Nikola Antić","LB","СРБ","Ordabasy Shymkent",32,"1994-01-04",2215,25,22,1,2,50,102,14,76.4,7.15,500000,"nikola-antic",254905,1],[39,"Karlo Bartolec","RB","ХРВ","FC Astana",31,"1995-04-20",1951,22,21,3,0,20,138,11,84.92,7.01,500000,"karlo-bartolec",359802,1],[40,"Pape-Alioune Ndiaye","CB","ФРА/СЕН","Tobol Kostanay",28,"1998-02-04",1860,21,20,0,2,3,114,4,82.96,6.82,500000,"pape-alioune-ndiaye",897826,1],[41,"Zhasulan Amir","ST","КАЗ","Ordabasy Shymkent",19,"2006-12-26",1522,24,12,8,3,22,166,42,67.25,7.18,500000,"zhasulan-amir",2058613,0],[42,"Maj Mittendorfer","CB","СЛО","Yelimay Semey",26,"2000-05-11",720,8,8,0,0,2,47,0,83.75,7.0,500000,"maj-mittendorfer",1098957,0],[43,"Gustavo Mendonca","CM","ПОР","Kairat Almaty",23,"2003-03-11",539,7,6,0,1,6,45,2,85.4,6.89,500000,"mendonca-gustavo",1006114,0],[44,"Ivan Miladinovic","CB","СРБ/РОС","FC Astana",32,"1994-08-14",398,6,4,0,0,0,29,0,80.19,6.62,500000,"ivan-miladinovic",552500,1],[45,"Damir Kasabulat","CDM","КАЗ","Kairat Almaty",24,"2002-08-29",356,9,2,0,0,0,31,0,81.97,6.66,500000,"damir-kasabulat",1184364,1],[46,"Maksim Plotnikov","GK","БЛР","Zhenis Astana",28,"1998-01-28",2250,25,25,0,0,0,15,0,80.57,6.98,450000,"maksim-plotnikov",823051,1],[47,"Temirlan Erlanov","CB","КАЗ","FC Aktobe",33,"1993-07-09",1980,22,22,2,1,2,194,3,87.64,7.18,450000,"temirlan-yerlanov",842581,1],[48,"Oralkhan Omirtaev","ST","КАЗ","Okzhetpes Kokshetau",28,"1998-07-16",1832,24,21,9,0,17,162,25,67.55,7.04,450000,"oralkhan-omirtaev",906221,1],[49,"Danila Nechaev","CB","БЛР","Kaspiy Aktau",26,"1999-10-30",1785,20,19,1,0,4,122,11,80.03,6.59,450000,"danila-nechaev",929335,1],[50,"Dinmukhamed Karaman","CM","КАЗ","FC Astana",26,"2000-06-26",1776,23,19,0,1,11,130,11,88.56,6.81,450000,"dinmukhamed-karaman",937547,1],[51,"Ariagner Smith","ST","НИК","FC Ulytau Zhezkazgan",27,"1998-12-13",1555,20,17,2,2,13,94,7,72.03,6.8,450000,"ariagner-smith",842941,1],[52,"Diego Luna","CB","ВЕН","Zhetysu Taldykorgan",26,"2000-01-02",1530,17,17,0,0,1,129,4,86.61,6.95,450000,"diego-luna",878939,1],[53,"Maksim Myakish","CDM","БЛР","Tobol Kostanay",26,"2000-03-03",1480,19,16,1,0,10,100,4,84.9,6.89,450000,"maksim-myakish",919032,1],[54,"Dmytro Topalov","LW","УКР","FC Aktobe",28,"1998-03-12",1040,15,11,0,1,9,72,6,75.65,6.72,450000,"dmitry-topalov",859387,1],[55,"Bektemir Abdumannonov","LW","УЗБ","Okzhetpes Kokshetau",24,"2002-07-12",993,20,10,2,0,18,55,18,60.73,6.77,450000,"bektemir-abdumannonov",1156409,1],[56,"Uros Milovanović","ST","СРБ","Tobol Kostanay",25,"2000-10-18",2223,25,23,11,1,14,177,21,70.81,7.12,400000,"uros-milovanovic",891959,1],[57,"Askhat Tagybergen","CM","КАЗ","Tobol Kostanay",36,"1990-08-09",2117,24,22,2,7,37,122,8,82.52,7.22,400000,"askhat-tagybergen",60133,1],[58,"Ivan Konovalov","GK","РОС","Yelimay Semey",32,"1994-08-18",2070,23,23,0,0,0,17,0,75.52,6.9,400000,"ivan-konovalov",365788,1],[59,"Fessou Euloge Placca","ST","ТОГ","Yelimay Semey",31,"1994-12-31",1903,24,24,8,3,14,120,19,65.37,6.98,400000,"euloge-fessou-placca",307700,1],[60,"Arsen Ashirbek","RB","КАЗ","Yelimay Semey",22,"2003-10-22",1890,21,21,1,0,18,216,33,71.2,6.94,400000,"arsen-ashirbek",1877500,0],[61,"Nauryzbek Zhagorov","CM","КАЗ","Tobol Kostanay",28,"1998-03-01",1707,21,18,0,1,14,193,36,78.29,6.79,400000,"nauryzbek-zhagorov",888872,1],[62,"Luka Imnadze","LW","ГРУ","Zhenis Astana",29,"1997-08-26",1651,20,19,3,1,15,192,26,74.04,7.09,400000,"luka-imnadze",1100232,1],[63,"Abinur Nurymbet","CAM","КАЗ","Ordabasy Shymkent",21,"2005-04-26",1411,23,12,1,0,8,125,16,81.88,6.74,400000,"abinur-nurymbet",1159615,0],[64,"Edmilson","ST","БРА","Kairat Almaty",29,"1997-04-19",1359,23,16,9,4,18,128,9,69.52,7.23,400000,"edmilson",1417710,1],[65,"Léo Natel","LW","БРА","Ordabasy Shymkent",29,"1997-03-14",1262,20,18,4,2,23,111,30,74.45,7.3,400000,"leo-natel",875905,1],[66,"Roman Asrankulov","LB","КАЗ","Tobol Kostanay",27,"1999-06-30",1254,19,13,0,0,9,85,9,78.37,6.53,400000,"roman-asrankulov",987796,1],[67,"Alexander Merkel","CM","КАЗ/ГЕР","FC Astana",34,"1992-02-22",884,20,6,0,0,15,57,2,84.67,6.81,400000,"alexander-merkel",143228,1],[68,"Marc Gual","ST","ИСП","Kairat Almaty",30,"1996-03-13",875,12,10,7,4,12,53,20,75.0,7.18,400000,"marc-gual",860683,0],[69,"Strahinja Tanasijević","CB","СРБ","Yelimay Semey",29,"1997-06-12",801,9,8,0,1,6,76,1,80.64,6.86,400000,"strahinja-tanasijevic",907214,0],[70,"Đorđe Maksimović","ST","СРБ","FC Atyrau",26,"1999-10-09",800,11,8,1,0,6,27,1,68.06,6.62,400000,"djordje-maksimovic",905970,0],[71,"Dauren Zhumat","RW","КАЗ","Tobol Kostanay",27,"1999-03-02",702,16,8,0,1,10,53,5,79.86,6.63,400000,"dauren-zhumat",1390423,1],[72,"Adilet Sadybekov","CDM","КАЗ","Kairat Almaty",24,"2002-05-26",570,12,5,0,0,4,50,2,78.44,6.56,400000,"adilet-sadybekov",1128502,1],[73,"Marko Jevtić","CB","СРБ","Irtysh Pavlodar",30,"1996-02-17",526,6,6,1,0,1,31,0,87.78,6.95,400000,"marko-jevtic",886182,0],[74,"Azamat Tuyakbayev","CAM","КАЗ","Kairat Almaty",19,"2007-07-13",495,15,2,2,3,16,73,14,69.18,6.89,400000,"azamat-tuyakbayev",1877556,0],[75,"Vladislav Vassiljev","CAM","КАЗ","Okzhetpes Kokshetau",29,"1997-04-10",2250,25,25,2,8,41,97,18,79.1,7.19,350000,"vassiljev-vladislav",1382034,0],[76,"Aleksandr Zarutskiy","GK","КАЗ/РОС","FC Aktobe",33,"1993-08-26",2160,24,24,0,0,0,19,0,86.72,7.27,350000,"aleksandr-zarutskiy",991896,1],[77,"Ivan Kuzmichev","CB","РОС","Okzhetpes Kokshetau",25,"2000-10-20",2160,24,24,1,0,3,189,3,85.37,7.14,350000,"kuzmichev-ivan",1092361,1],[78,"Dmitri Borodin","CM","БЛР","Okzhetpes Kokshetau",27,"1999-07-19",2070,23,23,4,3,21,122,10,80.52,7.13,350000,"dmitri-borodin",888815,0],[79,"Almas Tyulyubay","CDM","КАЗ","Yelimay Semey",25,"2001-04-18",1980,22,21,0,1,7,184,3,77.01,6.77,350000,"almas-tyulyubay",1189243,1],[80,"Konstantin Dorofeev","ST","РОС","FC Atyrau",21,"2005-08-17",1895,24,21,2,3,14,132,12,61.54,6.79,350000,"konstantin-dorofeev",1809602,0],[81,"Ramazan Karimov","ST","КАЗ","FC Astana",27,"1999-06-05",1676,23,17,5,5,16,128,4,78.38,7.03,350000,"ramazan-karimov",937821,0],[82,"Georgiy Zhukov","CM","КАЗ/БЕЛ","FC Aktobe",31,"1994-11-19",1675,21,19,0,0,11,119,12,84.04,6.87,350000,"georgy-zhukov",152124,1],[83,"Jóannes Bjartalíð","ST","ФАР","Qyzyljar Petropavlovsk",30,"1996-07-10",1588,22,15,4,5,20,91,19,80.25,6.96,350000,"joannes-bjartalid",850321,0],[84,"Marin Belancic","CB","ХРВ","Yelimay Semey",25,"2001-01-12",1440,16,15,0,0,4,157,9,76.68,7.03,350000,"marin-belancic",1114197,1],[85,"Danil Ustimenko","GK","КАЗ","Tobol Kostanay",26,"2000-08-08",1260,14,14,0,0,0,10,0,80.41,7.28,350000,"danil-ustimenko",887322,1],[86,"Murodzhon Khalmatov","CM","КАЗ","Irtysh Pavlodar",23,"2003-07-20",1069,20,11,1,0,21,58,13,73.47,6.87,350000,"murojon-khalmatov",1005879,1],[87,"Everton Macedo Moraes","ST","БРА","Ordabasy Shymkent",24,"2002-05-12",1051,19,11,5,2,17,103,33,75.76,7.25,350000,"everton-macedo-moraes",2058082,1],[88,"Aybol Abiken","CDM","КАЗ","Qyzyljar Petropavlovsk",30,"1996-06-01",1008,15,12,3,1,10,130,9,76.96,7.01,350000,"aibol-abiken",887318,1],[89,"Klaidher Macedo","CB","БРА/ИТА","Kaysar Kyzylorda",27,"1999-01-18",990,11,11,0,1,5,91,4,84.29,7.19,350000,"klaidher-macedo",1462685,0],[90,"Darko Dodev","LW","МКД","Altay Oskemen",28,"1998-01-16",601,10,6,1,3,7,40,12,69.64,7.03,350000,"darko-dodev",839649,0],[91,"Maksym Kucheryavyi","CM","УКР","Kaspiy Aktau",24,"2002-05-09",251,9,2,0,0,2,18,4,77.61,6.64,350000,"maksym-kucheryavyi",1129970,1],[92,"Miroslav Lobantsev","GK","РОС","Okzhetpes Kokshetau",31,"1995-05-27",2250,25,25,0,0,0,15,0,76.67,7.09,300000,"miroslav-lobantsev",227444,0],[93,"Nikola Cuckić","CM","СРБ","Kaysar Kyzylorda",29,"1997-04-11",2217,25,22,4,2,21,87,3,77.32,7.04,300000,"nikola-cuckic",795695,0],[94,"Adílio Santos","RW","БРА","Zhenis Astana",33,"1993-07-05",2174,25,24,3,1,14,221,20,76.9,7.09,300000,"adilio",886246,1],[95,"Adilkhan Tanzharikov","RB","КАЗ","FC Aktobe",29,"1996-11-25",2160,24,22,0,1,10,135,16,82.36,6.68,300000,"adilkhan-tanzharikov",909641,1],[96,"Kuanysh Kalmuratov","LB","КАЗ","FC Atyrau",30,"1996-08-27",2070,23,23,2,2,30,201,15,73.4,7.25,300000,"kuanysh-kalmuratov",1023527,0],[97,"Etienne Beugre","ST","КИВ","Qyzyljar Petropavlovsk",25,"2000-12-12",2070,23,23,8,0,18,290,43,67.17,7.05,300000,"beugre-etienne",1650141,0],[98,"Samuel Odeoyibo","CB","НИГ/ФРА","Altay Oskemen",32,"1993-09-28",1980,22,21,1,0,5,144,18,79.13,6.79,300000,"samuel-odeyobo",1024263,1],[99,"David Martin Anane","RW","ГАН","FC Ulytau Zhezkazgan",25,"2001-07-24",1980,22,22,3,1,23,202,71,72.81,7.03,300000,"david-martin-anane",1068704,0],[100,"Sanzhar Satanov","CB","КАЗ","FC Atyrau",24,"2001-09-21",1890,21,21,0,0,7,125,14,77.09,6.84,300000,"sanzhar-satanov",1189274,0],[101,"Nemanja Cavnic","CB","ЧЕР","Tobol Kostanay",31,"1995-09-05",1655,19,18,0,0,3,121,1,84.92,6.83,300000,"nemanja-cavnic",278767,1],[102,"Agustín Pastoriza","LW","АРГ/ИСП","FC Aktobe",30,"1996-01-31",1550,22,18,1,5,47,178,58,67.52,7.31,300000,"agustin-pastoriza-pibe",928698,0],[103,"Sagi Sovet","LB","КАЗ","Kaysar Kyzylorda",26,"2000-03-15",1352,16,15,0,1,5,139,21,69.66,6.79,300000,"sagi-sovet",860982,0],[104,"Ivan Sviridov","ST","КАЗ","Yelimay Semey",24,"2002-06-28",1276,24,14,2,1,11,124,16,67.07,6.79,300000,"sviridov-ivan",1091823,1],[105,"Henrique Devens","ST","БРА/ЛЮК","FC Atyrau",29,"1997-06-20",1259,19,13,4,0,4,67,8,69.48,6.72,300000,"henrique-devens",982932,1],[106,"Aleksandr Shirobokov","CB","КАЗ","Kairat Almaty",23,"2003-01-02",1114,16,11,0,0,1,108,0,87.68,7.12,300000,"aleksandr-shirobokov",1000277,0],[107,"Amine Talal","CM","МАР","Tobol Kostanay",30,"1996-06-05",1107,17,12,1,1,27,77,16,76.05,6.99,300000,"amine-talal",889593,1],[108,"Mukhammedzhan Seysen","GK","КАЗ","FC Astana",27,"1999-02-14",1080,12,12,0,0,1,4,0,88.14,6.89,300000,"mukhammejan-seisen",928490,1],[109,"Josip Čondrić","GK","ХРВ/БиГ","FC Astana",33,"1993-08-27",1080,12,12,0,0,1,9,2,90.0,7.33,300000,"josip-condric",282369,0],[110,"Zhaslan Zhumashev","LW","КАЗ","Tobol Kostanay",24,"2001-09-27",996,15,11,5,1,5,108,16,77.82,6.83,300000,"zhaslan-zhumashev",1034644,0],[111,"Franjo Prce","CB","ХРВ","FC Atyrau",30,"1996-01-07",766,9,8,0,1,4,48,0,87.58,7.03,300000,"franjo-prce",190427,0],[112,"Liridon Latifi","LW","АЛБ/КОС","Qyzyljar Petropavlovsk",32,"1994-02-06",763,9,8,2,0,9,73,23,60.38,7.14,300000,"liridon-latifi",793239,0],[113,"Samuel Opeh","CB","НИГ","Irtysh Pavlodar",27,"1998-12-25",720,8,8,0,0,0,49,2,87.13,6.8,300000,"samuel-opeh",1142868,0],[114,"Aybar Zhaksylykov","ST","КАЗ","Yelimay Semey",29,"1997-07-24",696,19,4,3,1,4,64,11,58.04,6.65,300000,"aybar-zhaksylykov",987885,1],[115,"Zhan-Ali Payruz","LW","КАЗ","Yelimay Semey",27,"1999-08-12",672,18,6,0,1,14,74,19,70.41,6.78,300000,"zhan-ali-payruz",987887,1],[116,"Đorđe Pantelić","RW","СРБ/БиГ","FC Atyrau",26,"1999-11-29",560,8,5,1,0,8,40,9,71.09,7.04,300000,"dorde-pantelic",924327,0],[117,"Marin Tomasov","RW","ХРВ","FC Astana",39,"1987-08-31",1980,22,22,10,3,40,115,38,71.01,7.42,275000,"marin-tomasov",51136,0],[118,"Islambek Kuat","CDM","КАЗ","Zhenis Astana",33,"1993-01-12",1890,21,21,1,0,14,104,1,80.25,6.91,275000,"islambek-kuat",98478,1],[119,"Lucas Áfrico","CB","БРА","Kairat Almaty",31,"1995-02-05",1379,17,13,1,0,0,148,4,84.11,6.92,275000,"lucas-africo",939792,1],[120,"Björn Johnsen","ST","НОР/США","Ordabasy Shymkent",34,"1991-11-06",1080,13,11,8,2,9,74,1,64.58,7.25,275000,"bjorn-johnsen",258739,0],[121,"Askhat Baltabekov","LB","КАЗ","Zhetysu Taldykorgan",32,"1993-11-06",2160,24,23,3,6,37,157,24,73.16,7.07,250000,"askhat-baltabekov",333499,0],[122,"Léo Assunpção","CB","БРА","Okzhetpes Kokshetau",24,"2002-04-24",2160,24,23,3,0,3,200,2,86.43,7.05,250000,"leo-assunpcao",1177560,0],[123,"Nikola Jambor","CDM","ХРВ","Altay Oskemen",30,"1995-09-25",2070,23,22,3,0,24,118,14,84.22,7.27,250000,"nikola-jambor",780366,0],[124,"Glib Bukhal","CB","УКР","FC Ulytau Zhezkazgan",30,"1995-11-12",2070,23,23,0,0,2,126,0,85.03,7.03,250000,"glib-bukhal",889947,0],[125,"Vladislav Klimovich","CM","БЛР","Kaspiy Aktau",30,"1996-06-12",2070,23,23,1,1,15,159,11,73.74,6.9,250000,"vladislav-klimovich",573256,0],[126,"Nemanja Micevic","CB","СРБ","Altay Oskemen",27,"1999-01-28",1980,22,22,0,0,4,211,10,87.09,6.86,250000,"nemanja-micevic",942147,1],[127,"Ardak Saulet","RW","КАЗ","Zhenis Astana",29,"1997-01-12",1646,23,19,0,0,7,88,6,77.8,6.64,250000,"ardak-saulet",811842,1],[128,"Jean Poé","RW","КИВ","Irtysh Pavlodar",29,"1996-12-15",1643,21,19,7,0,20,114,36,69.77,7.1,250000,"jean-morel-poe",864642,0],[129,"Zhansultan Mukhametkhanov","CDM","КАЗ","Okzhetpes Kokshetau",20,"2005-10-22",1637,23,20,3,3,14,156,30,78.41,6.92,250000,"zhansultan-mukhametkhanov",1535684,0],[130,"Nurbol Anuarbekov","ST","КАЗ","Zhetysu Taldykorgan",28,"1998-07-14",1503,24,16,7,1,13,105,7,73.36,6.94,250000,"nurbol-anuarbekov",1187366,0],[131,"Stanislav Basmanov","LW","КАЗ","FC Astana",25,"2001-06-24",1487,21,17,6,2,15,113,29,89.37,7.11,250000,"stanislav-basmanov",962362,0],[132,"Beka Vachiberadze","CM","ГРУ/УКР","FC Ulytau Zhezkazgan",30,"1996-03-05",1467,19,17,1,1,16,109,9,79.57,6.88,250000,"beka-vachiberadze",287661,0],[133,"Vasili Sovpel","RM","БЛР","Okzhetpes Kokshetau",27,"1999-03-23",1326,24,15,1,2,21,111,32,78.11,6.91,250000,"vasili-sovpel",987325,0],[134,"Erkin Tapalov","RB","КАЗ","Kairat Almaty",33,"1993-09-03",1084,17,11,0,4,18,89,11,73.62,7.06,250000,"erkin-tapalov",890314,1],[135,"Duban Palacio","LW","КОЛ","Yelimay Semey",29,"1997-03-16",993,18,12,0,1,11,99,24,64.19,6.84,250000,"duvan-palacios",832687,1],[136,"Sultan Busurmanov","GK","КАЗ","Tobol Kostanay",30,"1996-05-10",990,11,11,0,0,0,1,0,86.61,7.3,250000,"sultan-busurmanov",1116926,0],[137,"Vladyslav Naumets","RW","УКР","Zhenis Astana",27,"1999-03-07",900,21,5,1,2,15,67,23,84.29,6.91,250000,"vladyslav-naumets",951906,1],[138,"Victor Moses","RW","НИГ/АНГ","Kaysar Kyzylorda",35,"1990-12-11",869,13,11,1,1,11,80,18,76.89,6.87,250000,"victor-moses",31585,0],[139,"Olzhas Baibek","CDM","КАЗ","Kairat Almaty",21,"2005-02-11",784,16,8,1,0,2,65,2,91.34,6.71,250000,"olzhas-baibek",1159611,0],[140,"Marko Vukčević","RB","ЧЕР","Tobol Kostanay",33,"1993-06-07",554,8,6,1,1,4,45,7,75.44,6.8,250000,"marko-vukcevic",137822,1],[141,"Marcinho","CDM","БРА","Okzhetpes Kokshetau",27,"1999-05-22",535,6,6,0,0,2,44,1,89.13,6.67,250000,"marcinho",981012,0],[142,"Damir Marat","RW","КАЗ","FC Astana",25,"2000-11-05",340,12,2,0,0,6,32,6,81.58,6.62,250000,"damir-marat",1187364,1],[143,"Oleksandr Noyok","CDM","УКР","Qyzyljar Petropavlovsk",34,"1992-05-15",2070,23,23,1,0,5,155,2,73.71,6.92,225000,"oleksandr-noyok",137676,0],[144,"Aleksandr Martynovich","CB","БЛР/РОС","Kairat Almaty",39,"1987-08-26",1890,21,21,2,1,5,181,0,90.22,7.28,225000,"aleksandr-martynovich",56544,0],[145,"Nedeljko Piščević","CDM","СРБ","Qyzyljar Petropavlovsk",31,"1995-04-20",1701,20,17,1,1,6,136,4,76.37,6.78,225000,"nedeljko-piscevic",889060,0],[146,"Dinmuhammed Kashken","CB","КАЗ","Zhetysu Taldykorgan",26,"2000-01-04",1662,20,20,1,0,3,86,1,75.71,6.44,225000,"dinmuhammed-kashken",994911,0],[147,"Bauyrzhan Islamkhan","CAM","КАЗ","FC Astana",33,"1993-02-23",1434,23,19,2,9,33,79,21,86.35,7.23,225000,"bauyrzhan-islamkhan",156328,0],[148,"Dmitri Podstrelov","RW","БЛР","Altay Oskemen",28,"1998-09-06",1031,12,10,1,0,10,87,7,65.22,6.64,225000,"dmitri-podstrelov",891737,0],[149,"Andrija Filipović","ST","ХРВ","Zhenis Astana",29,"1997-04-18",847,12,8,3,2,9,52,15,76.35,7.37,225000,"andrija-filipovic",827385,0],[150,"Tamerlan Agimanov","RW","КАЗ","Irtysh Pavlodar",20,"2006-08-16",606,15,5,1,0,7,63,7,65.87,6.79,225000,"tamerlan-agimanov",1214351,0],[151,"Jovan Pajović","CB","ЧЕР","Zhetysu Taldykorgan",30,"1996-08-28",2160,24,23,2,1,0,237,0,82.72,6.98,200000,"jovan-pajovic",1030484,0],[152,"Noha Ndombasi","ST","ФРА/ДРК","Kaspiy Aktau",25,"2001-04-28",2098,24,24,6,1,17,197,75,73.88,6.99,200000,"noha-ndombasi",911855,0],[153,"Tsotne Mosiashvili","CM","ГРУ","Zhetysu Taldykorgan",31,"1995-02-14",2070,23,23,0,2,17,235,17,84.84,6.91,200000,"tsotne-mosiashvili",303160,0],[154,"Borys Lototskyi","CB","УКР","Okzhetpes Kokshetau",23,"2003-04-11",2070,23,22,4,1,7,202,5,82.06,6.89,200000,"borys-lototskyi",1648308,0],[155,"Ivan Šaravanja","CB","БиГ/ХРВ","Zhenis Astana",30,"1996-08-24",1980,22,21,0,0,4,128,3,86.25,6.95,200000,"ivan-saravanja",870024,0],[156,"Nurymzhan Salaydin","GK","КАЗ","Kaysar Kyzylorda",30,"1995-10-27",1890,21,21,0,0,1,10,0,80.05,7.08,200000,"nurymzhan-salaydin",942423,0],[157,"Bernardo Morgado","CB","ПОР","Kaspiy Aktau",28,"1998-03-24",1890,21,21,1,0,2,163,0,86.53,7.05,200000,"bernardo-morgado",843750,0],[158,"Zurab Tevzadze","CB","ГРУ","Zhenis Astana",32,"1994-08-28",1871,21,20,1,0,6,186,5,86.56,7.07,200000,"zurab-tevzadze",890795,0],[159,"Niyaz Idrisov","CB","КАЗ","Kaysar Kyzylorda",27,"1999-07-21",1800,20,19,0,2,5,128,2,83.01,6.81,200000,"niyaz-idrisov",936937,0],[160,"Nurgaini Buribayev","CM","КАЗ","Okzhetpes Kokshetau",24,"2002-08-20",1652,24,21,4,2,21,123,15,77.2,6.83,200000,"nurgaini-buribayev",1108327,0],[161,"Sagadat Tursynbay","LB","КАЗ","Zhenis Astana",27,"1999-03-26",1583,19,16,2,0,10,125,2,76.32,6.92,200000,"sagadat-tursynbay",889091,0],[162,"Marat Bystrov","RB","КАЗ/РОС","Zhenis Astana",34,"1992-06-19",1530,17,16,0,0,7,136,15,80.13,6.76,200000,"marat-bystrov",869942,0],[163,"Sergey Ivanov","CB","КАЗ","Altay Oskemen",22,"2004-07-05",1513,22,15,0,1,4,120,9,72.68,6.68,200000,"sergey-ivanov",1101866,0],[164,"Aliyar Mukhamed","LW","КАЗ","Kaysar Kyzylorda",25,"2001-03-20",1405,25,14,4,1,7,105,13,69.18,6.78,200000,"mukhamed-aliyar",1000640,0],[165,"Akmal Bakhtiyarov","LW","КАЗ","Yelimay Semey",28,"1998-06-02",1366,23,11,3,0,18,101,20,67.95,6.98,200000,"akmal-bakhtiyarov",858207,0],[166,"Miqueias","CM","БРА","Kaysar Kyzylorda",25,"2001-07-27",1320,17,13,0,0,6,102,9,84.87,6.75,200000,"miqueias",1172986,0],[167,"Rinat Dzhumatov","CM","КАЗ","FC Atyrau",28,"1997-10-13",1260,14,14,0,0,14,86,1,74.02,6.62,200000,"rinat-dzhumatov",1116438,0],[168,"Aslan Adil","RW","КАЗ","Qyzyljar Petropavlovsk",28,"1998-01-13",968,16,11,1,2,9,78,12,74.13,6.76,200000,"aslan-adil",890515,0],[169,"Stéphane Bahoken","ST","КАМ/ФРА","Qyzyljar Petropavlovsk",34,"1992-05-28",905,17,9,3,0,2,54,2,74.84,6.71,200000,"stephane-bahoken",153220,0],[170,"David Carmona","RB","ИСП","FC Ulytau Zhezkazgan",29,"1997-01-11",850,10,9,0,0,3,45,5,79.81,6.78,200000,"david-carmona",800986,0],[171,"Danilo Kucher","GK","УКР","Altay Oskemen",29,"1997-01-25",810,9,9,0,0,0,2,0,77.02,6.84,200000,"kucher-danilo",1131756,0],[172,"Idris Umaev","ST","РОС","Kaspiy Aktau",27,"1999-01-15",742,20,6,2,0,4,70,17,66.97,6.7,200000,"idris-umaev",928379,0],[173,"Ilya Chernyak","ST","БЛР","FC Ulytau Zhezkazgan",24,"2002-05-19",711,11,6,2,1,7,56,12,83.33,6.95,200000,"ilya-charniak",1104188,0],[174,"Nurali Zhaksylyk","RW","КАЗ","Kaysar Kyzylorda",21,"2004-11-04",644,16,4,1,0,9,66,19,78.16,6.85,200000,"nurali-zhaksylyk",1511629,0],[175,"Shakhboz Umarov","LW","УЗБ","Okzhetpes Kokshetau",27,"1999-03-09",554,12,5,1,1,9,53,15,71.79,6.92,200000,"shakhboz-umarov",975728,0],[176,"Agostinho","ST","ГБС/ПОР","Kaysar Kyzylorda",26,"2000-07-01",537,8,5,0,0,4,50,3,78.86,6.68,200000,"agostinho",1394830,0],[177,"Sergey Maliy","CB","КАЗ/УКР","Ordabasy Shymkent",36,"1990-06-05",1947,22,19,4,0,7,225,1,88.31,7.38,175000,"sergey-maliy",76522,0],[178,"Sultan Askarov","CB","КАЗ","Kaysar Kyzylorda",22,"2004-01-21",1620,18,16,0,1,1,90,3,81.76,6.76,175000,"sultan-askarov",1005901,0],[179,"David Esimbekov","CM","КАЗ","Irtysh Pavlodar",22,"2004-09-11",1191,17,12,0,1,8,92,17,80.46,6.76,175000,"david-esimbekov",1392013,0],[180,"Abzal Beysebekov","RB","КАЗ","FC Astana",33,"1992-11-30",1179,21,9,0,0,10,61,4,90.39,6.61,175000,"abzal-beysebekov",86285,0],[181,"Imoh Ezekiel","ST","НИГ","Kaysar Kyzylorda",32,"1993-10-24",1080,19,11,2,0,9,95,20,72.09,6.71,175000,"imoh-ezekiel",221166,0],[182,"Salamat Zhumabekov","CDM","КАЗ","Kaysar Kyzylorda",22,"2004-01-25",971,17,8,0,0,5,69,2,84.16,6.62,175000,"salamat-zhumabekov",1391418,0],[183,"Yan Trufanov","ST","КАЗ","FC Atyrau",22,"2004-05-17",886,22,7,1,1,5,93,14,70.43,6.6,175000,"yan-trufanov",1101837,0],[184,"Elguja Lobjanidze","ST","ГРУ","Altay Oskemen",33,"1992-09-17",862,19,9,2,3,8,101,7,69.17,6.74,175000,"elguja-lobjanidze",226948,0],[185,"Mamadou Mbodj","CB","СЕН","Irtysh Pavlodar",33,"1993-03-12",811,10,8,1,1,4,58,0,89.97,7.16,175000,"mamadou-mbodj",1401827,0],[186,"Adilkhan Dobay","RB","КАЗ","Zhetysu Taldykorgan",24,"2002-06-02",2250,25,25,1,0,12,160,15,78.08,6.65,150000,"adilkhan-dobay",987795,0],[187,"Doszhan Kenzhegulov","CB","КАЗ","Altay Oskemen",26,"2000-01-13",2070,23,23,1,0,0,183,1,84.22,7.04,150000,"doszhan-kenzhegulov",2122236,0],[188,"Kotaro Kishi","LW","ЯПО","FC Ulytau Zhezkazgan",26,"2000-06-27",1894,24,22,0,2,11,138,44,78.57,6.72,150000,"kotaro-kishi",1839160,0],[189,"Samat Zharynbetov","CM","КАЗ","Zhenis Astana",32,"1994-01-04",1735,23,19,0,0,14,123,4,85.08,6.73,150000,"samat-zharynbetov",887298,0],[190,"Sergey Keiler","LB","КАЗ","Ordabasy Shymkent",31,"1994-11-08",1699,19,18,1,1,28,120,15,66.39,7.24,150000,"sergey-keiler",135169,0],[191,"Saif Popov","LW","КАЗ","Altay Oskemen",22,"2004-06-30",1535,22,15,5,1,21,177,47,67.09,7.04,150000,"saif-popov",1153327,0],[192,"Anatoliy Kozlenko","CB","УКР","Qyzyljar Petropavlovsk",24,"2002-05-31",1530,17,16,1,0,2,109,4,75.0,6.72,150000,"anatoliy-kozlenko",1091278,0],[193,"Demiyat Slambekov","CB","КАЗ","Irtysh Pavlodar",29,"1997-01-13",1114,17,11,0,0,2,88,1,84.32,6.82,150000,"demiyat-slambekov",887349,0],[194,"Yuriy Pertsukh","CM","КАЗ","Qyzyljar Petropavlovsk",30,"1996-05-13",1067,22,11,1,0,5,76,5,75.4,6.46,150000,"yuriy-pertsukh",890312,0],[195,"Nurdaulet Agzambaev","ST","КАЗ","Kaysar Kyzylorda",27,"1999-06-02",890,17,9,1,1,3,60,8,77.61,6.66,150000,"nurdaulet-agzambaev",1877415,0],[196,"Bakhtiyar Toleuov","CB","КАЗ","Irtysh Pavlodar",21,"2005-06-08",882,14,8,0,0,3,58,0,84.78,6.79,150000,"bakhtiyar-toleuov",1592932,0],[197,"Roman Murtazaev","LW","КАЗ","Yelimay Semey",33,"1993-09-10",858,22,6,10,1,10,56,14,72.09,6.9,150000,"roman-murtazaev",241908,0],[198,"Adilet Kenesbek","RB","КАЗ","Kaysar Kyzylorda",30,"1996-01-05",728,10,8,2,0,3,59,1,73.19,6.63,150000,"adilet-kenesbek",887378,0],[199,"Patrick Kpozo","LB","ГАН","Zhenis Astana",29,"1997-07-15",699,10,9,0,0,2,40,6,74.75,6.74,150000,"patrick-kpozo",818429,0],[200,"Lev Kurgin","LB","КАЗ","Kairat Almaty",24,"2002-06-06",509,11,5,0,2,9,40,2,81.74,6.81,150000,"lev-kurgin",1144351,0],[201,"Nikita Pivkin","GK","КАЗ","Yelimay Semey",23,"2003-03-27",450,5,5,0,0,0,2,0,82.26,6.52,150000,"nikita-pivkin",1005876,0],[202,"Egor Tkachenko","RB","КАЗ","FC Atyrau",23,"2003-04-15",1980,22,21,1,1,13,112,14,67.81,6.75,125000,"egor-tkachenko",1000497,0],[203,"Zhomart Dinmukhammed","GK","КАЗ","Kaspiy Aktau",25,"2000-12-06",1890,21,21,0,1,3,14,0,76.45,7.16,125000,"zhomart-dinmukhammed",1024296,0],[204,"Maksat Taykenov","LB","КАЗ","Kaspiy Aktau",29,"1997-08-14",1800,20,20,0,2,13,137,17,77.41,6.85,125000,"maksat-taykenov",1049057,0],[205,"Abylaikhan Nazymkhanov","CM","КАЗ","Altay Oskemen",24,"2002-02-05",1718,22,21,0,0,5,132,14,75.59,6.63,125000,"abylaikhan-nazymkhanov",1105599,0],[206,"Amandyk Nabikhanov","CB","КАЗ","Kaspiy Aktau",28,"1997-11-09",1627,19,17,1,0,5,91,1,84.19,6.76,125000,"amandyk-nabikhanov",1023539,0],[207,"Dragan Stoisavljević","ST","СРБ","Altay Oskemen",22,"2003-11-25",1558,24,20,3,3,14,156,13,68.03,6.82,125000,"dragan-stoisavljevic",1008672,0],[208,"Rauan Orynbasar","CB","КАЗ","Zhetysu Taldykorgan",28,"1998-03-01",1423,20,14,0,0,2,90,1,86.26,6.75,125000,"rauan-orynbasar",890509,0],[209,"Adam Adakhajiev","CM","КАЗ/РОС","Zhetysu Taldykorgan",27,"1998-11-23",1417,18,15,1,0,4,74,3,84.8,6.71,125000,"adam-adakhajiev",887327,0],[210,"Strahinja Jovanović","LW","СРБ","Zhetysu Taldykorgan",27,"1999-06-01",1330,22,12,1,1,6,70,16,69.74,6.67,125000,"strahinja-jovanovic",921189,0],[211,"Vyacheslav Shvyrev","CAM","КАЗ/РОС","Zhetysu Taldykorgan",25,"2001-01-07",1231,19,15,0,2,7,75,10,71.92,6.76,125000,"vyacheslav-shvyrev",905011,0],[212,"Artem Cheredinov","RM","КАЗ","Qyzyljar Petropavlovsk",28,"1998-07-17",1162,21,11,0,1,12,113,13,72.3,6.71,125000,"artem-cheredinov",1024291,0],[213,"Batyrkhan Tazhibay","LW","КАЗ","Kaysar Kyzylorda",25,"2001-08-07",812,11,8,0,0,10,78,9,78.84,6.78,125000,"batyrkhan-tazhibay",1136938,0],[214,"Zikrillo Sultaniyazov","RW","КАЗ","Irtysh Pavlodar",22,"2003-10-15",791,12,8,0,0,9,79,13,62.44,6.78,125000,"zikrillo-sultaniyazov",1109905,0],[215,"Ebenezer Ofori","CDM","ГАН","FC Atyrau",31,"1995-07-01",586,7,6,0,0,2,26,1,86.52,6.76,125000,"ebenezer-ofori",332961,0],[216,"Arsen Buranchiev","CM","КАЗ/КГЗ","FC Atyrau",25,"2001-09-12",564,16,4,0,1,4,36,4,79.68,6.64,125000,"arsen-buranchiev",1092517,0],[217,"Dmytro Nepohodov","GK","КАЗ/УКР","FC Ulytau Zhezkazgan",38,"1988-02-17",2250,25,25,0,0,0,10,0,82.38,6.92,100000,"dmytro-nepohodov",39562,0],[218,"Dumitru Celeadnic","GK","МЛД","Qyzyljar Petropavlovsk",34,"1992-04-23",2250,25,25,0,0,0,19,0,78.24,6.92,100000,"dumitru-celeadnic",841968,0],[219,"Dmitry Schmidt","RB","КАЗ","Altay Oskemen",32,"1993-11-17",2070,23,23,1,1,9,149,2,74.82,6.59,100000,"dmitry-schmidt",890310,0],[220,"Timur Dosmagambetov","LB","КАЗ","FC Aktobe",37,"1989-05-01",2046,23,21,1,2,12,123,7,80.97,6.78,100000,"timur-dosmagambetov",60469,0],[221,"Dierzhon Aripov","RB","КАЗ","Kaspiy Aktau",29,"1997-03-10",2024,24,22,0,0,6,171,17,73.39,6.55,100000,"dierzhon-aripov",1187447,0],[222,"Georgiy Bugulov","CB","РОС","FC Ulytau Zhezkazgan",33,"1993-03-17",1967,22,22,3,0,3,199,2,86.86,7.08,100000,"georgiy-bugulov",944096,0],[223,"Arthur Bougnone","CDM","КАМ","FC Ulytau Zhezkazgan",25,"2000-11-20",1954,23,23,0,1,8,183,11,82.45,6.86,100000,"arthur-bougnone",1835402,0],[224,"Hiroki Harada","CM","ЯПО","FC Ulytau Zhezkazgan",28,"1998-05-23",1927,25,23,3,1,12,100,12,80.92,6.78,100000,"hiroki-harada",1218103,0],[225,"André Amaral","CB","ПОР","Kaspiy Aktau",26,"2000-01-12",1890,21,21,2,0,3,134,10,80.74,7.15,100000,"andre-amaral",1568252,0],[226,"Sagi Malikaydar","RB","КАЗ","Irtysh Pavlodar",22,"2004-09-06",1890,21,21,1,3,12,206,29,73.42,7.04,100000,"sagi-malikaydar",1878114,0],[227,"Serikzhan Muzhikov","CAM","КАЗ","Zhetysu Taldykorgan",37,"1989-06-17",1808,21,19,2,0,21,105,15,82.24,6.9,100000,"serikzhan-muzhikov",85701,0],[228,"Ibragim Dadayev","CM","КАЗ","Altay Oskemen",24,"2002-06-11",1803,23,21,4,0,21,143,23,72.1,6.83,100000,"ibragim-dadayev",1128508,0],[229,"Mario Rabiu","CDM","НИГ","FC Atyrau",26,"2000-02-06",1710,19,19,2,1,9,138,11,77.1,6.75,100000,"rabiu-riliwan-oyndamola",970724,0],[230,"Aleksandr Sokolenko","RB","КАЗ","Qyzyljar Petropavlovsk",29,"1996-11-23",1654,23,18,0,2,11,118,6,69.63,6.52,100000,"aleksandr-sokolenko",856479,0],[231,"Élder Santana","ST","БРА","Zhenis Astana",33,"1993-04-07",1507,19,15,1,2,11,136,8,77.5,6.85,100000,"elder-santana",870442,0],[232,"Yevhen Makarenko","CDM","УКР","Qyzyljar Petropavlovsk",35,"1991-05-21",1476,20,18,1,0,11,147,17,82.72,6.87,100000,"yevhen-makarenko",121898,0],[233,"Yushi Shimamura","CM","ЯПО","Irtysh Pavlodar",26,"1999-12-20",1413,22,14,2,0,12,103,11,85.58,6.79,100000,"yushi-shimamura",1185360,0],[234,"Aleksandr Marochkin","CB","КАЗ","Tobol Kostanay",36,"1990-07-14",1191,14,13,1,0,2,83,2,89.52,6.71,100000,"aleksandr-marochkin",887350,0],[235,"Marko Zivanovic","ST","СРБ","Zhetysu Taldykorgan",23,"2003-06-28",1162,23,11,5,0,10,103,11,71.26,6.81,100000,"marko-zivanovic",2498635,0],[236,"Nikita Gubarev","LB","КАЗ","Qyzyljar Petropavlovsk",22,"2004-04-17",1162,18,12,0,1,13,92,4,65.57,6.67,100000,"nikita-gubarev",1101863,0],[237,"Ersultan Kaldybekov","CM","КАЗ","Kaysar Kyzylorda",24,"2002-01-12",1161,21,11,0,1,6,106,12,76.15,6.68,100000,"ersultan-kaldybekov",1091067,0],[238,"Bakdaulet Konlimkos","RW","КАЗ","Kaysar Kyzylorda",25,"2000-12-05",1149,19,13,0,2,12,86,8,69.18,6.72,100000,"bakdaulet-konlimkos",1034687,0],[239,"Nani","LW","ПОР/КАБ","FC Aktobe",39,"1986-11-17",1112,18,10,1,4,18,133,29,83.4,7.07,100000,"nani",17740,0],[240,"Abzal Taubay","CM","КАЗ","FC Ulytau Zhezkazgan",34,"1992-02-18",962,24,8,0,0,3,74,9,67.2,6.55,100000,"taubay-abzal",822212,0],[241,"Ramazan Karimov","LB","КАЗ","Irtysh Pavlodar",21,"2004-11-24",915,13,9,1,2,8,77,6,74.55,6.74,100000,"ramazan-karimov",1408997,0],[242,"Stefan Bukorac","CB","СРБ","Kaysar Kyzylorda",35,"1991-02-14",900,10,10,1,0,2,84,1,85.48,7.14,100000,"stefan-bukorac",795871,0],[243,"Lucas Ramos","CDM","БРА","Irtysh Pavlodar",31,"1995-01-18",829,11,8,0,0,5,58,4,88.97,6.83,100000,"lucas-ramos",955104,0],[244,"Mikael Askarov","LB","КАЗ","Zhenis Astana",23,"2002-12-27",702,14,8,0,1,11,54,5,79.81,6.82,100000,"mikael-askarov",1084172,0],[245,"Miras Omatay","CM","КАЗ","Yelimay Semey",22,"2004-06-30",571,15,6,1,0,8,38,4,81.5,6.75,100000,"miras-omatay",1101855,0],[246,"Nurdaulet Baybosynov","CM","КАЗ","Irtysh Pavlodar",22,"2004-06-13",501,16,0,0,0,5,44,14,76.8,6.68,100000,"nurdaulet-baybosynov",1436203,0],[247,"Erkebulan Nurgaliyev","CAM","КАЗ","Okzhetpes Kokshetau",33,"1993-09-12",474,17,1,0,2,10,35,5,83.33,6.75,100000,"erkebulan-nurgaliyev",987886,0],[248,"Shokan Abzalov","ST","КАЗ","Zhetysu Taldykorgan",33,"1993-09-11",1460,24,17,1,1,11,141,17,73.11,6.6,75000,"shokan-abzalov",987892,0],[249,"Sayan Mukanov","RB","КАЗ","Okzhetpes Kokshetau",29,"1997-01-06",1314,25,12,0,1,7,80,8,79.38,6.62,75000,"sayan-mukanov",937814,0],[250,"Elisey Gorshunov","LB","КАЗ","Altay Oskemen",24,"2002-07-08",1269,23,13,0,2,27,101,15,67.41,6.84,75000,"elisey-gorshunov",1091809,0],[251,"Meyrambek Serikbay","CM","КАЗ","Kaspiy Aktau",26,"1999-12-16",1143,20,12,1,0,5,77,0,81.67,6.58,75000,"meyrambek-serikbay",1187434,0],[252,"Timur Muldinov","ST","КАЗ","Qyzyljar Petropavlovsk",32,"1993-09-19",1090,23,9,2,1,8,67,6,69.9,6.64,75000,"timur-muldinov",905765,0],[253,"Olzhas Kerimzhanov","CB","КАЗ","Qyzyljar Petropavlovsk",37,"1989-05-16",1066,13,11,0,0,3,93,1,82.47,6.76,75000,"olzhas-kerimzhanov",111379,0],[254,"Madi Zhakipbayev","CM","КАЗ","Zhetysu Taldykorgan",26,"2000-03-21",1064,22,8,1,2,9,76,7,77.45,6.63,75000,"madi-zhakipbayev",836560,0],[255,"Madi Khaseyn","CB","КАЗ","Zhenis Astana",25,"2000-12-17",1023,17,10,2,0,6,72,2,75.94,6.77,75000,"madi-khaseyn",1091066,0],[256,"Zhannur Kukeyev","CM","КАЗ","Altay Oskemen",22,"2003-09-18",932,24,6,0,0,5,107,6,70.11,6.6,75000,"zhannur-kukeyev",1005902,0],[257,"Toktar Zangylyshbay","ST","КАЗ","Okzhetpes Kokshetau",33,"1993-05-25",920,24,7,1,0,6,73,6,72.9,6.73,75000,"toktar-zangylyshbay",153178,0],[258,"David Epton","CM","ГАН","Kaspiy Aktau",21,"2005-06-06",884,11,9,0,0,2,85,2,80.41,6.76,75000,"david-epton",1807482,0],[259,"Denis Mitrofanov","ST","КАЗ","Altay Oskemen",24,"2002-01-09",786,23,6,2,1,6,71,3,68.46,6.72,75000,"mitrofanov-denis",1000642,0],[260,"Bekzat Kabylan","CM","КАЗ","Kaspiy Aktau",30,"1996-03-03",656,15,8,0,0,11,35,1,78.77,6.59,75000,"bekzat-kabylan",1023537,0],[261,"Aybar Abdulla","ST","КАЗ","FC Atyrau",24,"2002-01-22",616,14,9,1,0,4,28,3,73.64,6.61,75000,"aybar-abdulla",1092518,0],[262,"Rinat Serikkul","CM","КАЗ","FC Ulytau Zhezkazgan",24,"2002-05-16",580,19,4,0,0,2,28,2,87.78,6.51,75000,"rinat-serikkul",1486158,0],[263,"Ruslan Yudenkov","CB","БЛР","Irtysh Pavlodar",39,"1987-04-28",1890,21,20,0,2,6,206,1,77.54,7.33,50000,"ruslan-yudenkov",117876,0],[264,"Gian Martins","CDM","БРА","Zhenis Astana",33,"1993-04-02",1885,22,21,2,1,21,154,7,89.06,6.8,50000,"gian-martins",805274,0],[265,"Bakdaulet Zulfikarov","ST","КАЗ","FC Ulytau Zhezkazgan",25,"2001-03-11",1125,22,10,4,1,10,107,12,72.64,6.86,50000,"bakdaulet-zulfikarov",1113067,0],[266,"Vadim Afanasenko","LW","КАЗ","FC Ulytau Zhezkazgan",26,"2000-01-20",1069,16,10,0,0,2,75,11,81.44,6.73,50000,"vadim-afanasenko",1877849,0],[267,"Ramazan Abylaykhan","LW","КАЗ","Kaspiy Aktau",24,"2001-12-09",1054,22,11,3,1,6,84,6,62.76,6.69,50000,"ramazan-abylaykhan",1485337,0],[268,"Miras Rikhard","GK","КАЗ","Irtysh Pavlodar",21,"2005-02-03",630,7,7,0,0,0,3,0,78.0,7.21,50000,"miras-rikhard",1159618,0],[269,"Maksim Chalkin","CB","КАЗ","FC Ulytau Zhezkazgan",30,"1996-03-09",619,11,4,1,0,0,42,0,82.57,6.71,50000,"maksim-chalkin",962089,0],[270,"Timur Redzhepov","LB","КАЗ","Kaysar Kyzylorda",24,"2002-07-06",602,12,6,0,1,5,55,3,66.24,6.52,50000,"timur-redzhepov",1034689,0],[271,"Anuar Bekmyrza","LB","КАЗ","Kaspiy Aktau",25,"2001-05-07",593,11,5,0,1,2,46,1,71.43,6.5,50000,"anuar-bekmyrza",1108484,0],[272,"Abylaykhan Tolegenov","CB","КАЗ","Kaysar Kyzylorda",34,"1992-07-13",580,8,6,0,0,1,32,0,78.61,6.4,50000,"abylaykhan-tolegenov",1034654,0],[273,"Nurasyl Tokhtarov","GK","КАЗ","FC Atyrau",25,"2000-12-14",540,6,6,0,0,0,5,0,82.02,7.38,50000,"nurasyl-tokhtarov",1112952,0],[274,"Ștefan Sicaci","GK","МЛД/РОС","Zhetysu Taldykorgan",38,"1988-09-08",1710,19,19,0,0,0,16,1,84.73,6.88,25000,"stefan-sicaci",61241,0],[275,"Egor Khatkevich","GK","","FC Atyrau",38,"1988-04-09",1620,18,18,0,0,0,6,0,75.88,6.95,null,"egor-khatkevich",57481,0],[276,"Higor Gabriel","CB","БРА","Yelimay Semey",27,"1999-04-28",1530,17,17,0,0,3,149,3,83.96,6.99,null,"higor-gabriel-fernandes-alves",1016139,1],[277,"Damjan Krajišnik","CM","","Qyzyljar Petropavlovsk",29,"1997-04-24",1440,16,16,1,1,19,113,5,78.87,7.12,null,"damjan-krajisnik",939322,0],[278,"Dastan Satpaev","ST","КАЗ","Kairat Almaty",18,"2008-08-12",1256,15,13,7,2,22,117,39,81.84,7.4,null,"dastan-satpayev",1584939,1],[279,"Fard Ibrahim","CB","","Irtysh Pavlodar",26,"2000-01-07",1170,13,13,0,0,3,123,11,85.26,7.01,null,"fard-ibrahim",954535,0],[280,"Vitaliy Botnar","GK","","Irtysh Pavlodar",25,"2001-05-19",1170,13,13,0,1,0,5,0,86.55,6.92,null,"vitalii-botnar",919372,0],[281,"Godfrey Bitok Stephen","CB","","Irtysh Pavlodar",26,"2000-08-22",1080,12,12,0,0,7,75,15,82.59,6.84,null,"godfrey-bitok-stephen",988050,0],[282,"Leonel Strumia","CM","","Kaspiy Aktau",33,"1992-09-29",1080,12,12,0,0,3,87,5,86.79,6.62,null,"leonel-strumia",843228,0],[283,"Ajdin Zeljković","LW","ШВЕ/БиГ","FC Aktobe",28,"1997-12-26",1077,15,13,1,0,12,84,15,81.91,6.79,null,"ajdin-zeljkovic",876309,1],[284,"Evgeniy Berezkin","CM","БЛР","Yelimay Semey",30,"1996-07-05",1002,17,8,1,1,8,104,14,79.94,6.84,null,"evgeni-berezkin",1065772,1],[285,"Dan Glazer","CDM","ИЗР/ГЕР","Kairat Almaty",29,"1996-09-20",830,11,10,0,0,5,61,1,84.67,6.79,null,"dan-glazer",801381,1],[286,"Vladimir Stojkovic","GK","","Yelimay Semey",29,"1996-10-04",810,9,9,0,0,0,8,0,79.53,6.92,null,"vladimir-stojkovic",814737,0],[287,"Honore Gomis","CM","","Qyzyljar Petropavlovsk",30,"1996-02-26",801,11,9,0,0,4,63,7,75.63,6.67,null,"gomis-honore",973625,0],[288,"Plamen Galabov","CB","","Qyzyljar Petropavlovsk",30,"1995-11-02",748,9,8,0,0,0,74,0,84.47,6.98,null,"plamen-galabov",226970,0],[289,"Thomas Jones","RW","ЧИЛ","Kaysar Kyzylorda",28,"1997-09-25",717,15,9,0,0,6,63,14,79.77,6.55,null,"thomas-jones",986746,1],[290,"Amir Mokhammad","LB","РОС/АФГ","Kaysar Kyzylorda",30,"1996-02-23",630,7,7,0,0,2,60,6,74.19,6.69,null,"amir-mokhammad",943154,1],[291,"Meyrambek Kalmyrza","CB","","Kaspiy Aktau",24,"2001-12-15",623,11,7,0,0,0,36,3,76.82,6.59,null,"meyrambek-kalmyrza",1116396,0],[292,"Dmytro Yusov","ST","","FC Atyrau",33,"1993-05-11",566,10,6,0,0,2,39,4,77.03,6.68,null,"dmytro-yusov",239498,0],[293,"Islam Chesnokov","CM","","Tobol Kostanay",26,"1999-11-21",528,7,5,0,0,6,64,14,68.6,6.89,null,"islam-chesnokov",1126327,0],[294,"Keba Sylla","ST","ФРА/СЕН","Kaspiy Aktau",27,"1998-09-21",515,11,4,3,2,4,27,7,65.52,6.88,null,"keba-sylla",1525654,0],[295,"Dimitar Mitkov","ST","","Ordabasy Shymkent",26,"2000-01-27",471,10,7,1,1,2,41,0,80.37,6.67,null,"mitkov-dimitar",1002072,0],[296,"Samson Iyede","ST","НИГ","Irtysh Pavlodar",28,"1998-01-28",391,13,2,1,0,2,31,8,66.67,6.72,null,"samson-iyede",887054,1],[297,"Nikita Korzun","CDM","БЛР","FC Aktobe",31,"1995-03-06",385,5,4,0,0,2,36,1,84.96,6.72,null,"nikita-korzun",182097,1],[298,"Sebastián Zeballos","RW","АРГ","Kairat Almaty",25,"2001-07-17",333,10,3,0,1,5,29,12,82.14,6.78,null,"zeballos-juan-sebastian",1653138,1],[299,"Kirill Glushchenkov","CB","РОС","Tobol Kostanay",26,"2000-02-05",190,4,2,0,0,0,12,0,86.42,6.38,null,"glushchenkov-kirill",989612,1],[300,"Ricardinho","ST","БРА","Kairat Almaty",25,"2001-04-23",163,6,1,0,0,0,22,1,69.23,6.45,null,"ricardinho",1105992,1],[301,"Rubin Hebaj","ST","АЛБ","Tobol Kostanay",28,"1998-07-30",161,7,1,0,0,2,7,0,76.67,6.42,null,"rubin-hebaj",886122,1]];
+/* ══════════ МОДЕЛЬ KVI — та же методология, что в книге Excel ══════════
+   z внутри позиционной группы → веса (перераспределение на собранные метрики)
+   → KVI → AAF по возрасту → KVI_adj → нормализация KVI_adj и MV внутри группы
+   → UI = разность. Вратари вне модели. Порог включения — 450 минут.          */
+
+const GROUP={ST:'FW',CF:'FW',LW:'FW',RW:'FW',CM:'MF',CDM:'MF',CAM:'MF',LM:'MF',RM:'MF',
+              CB:'DF',LB:'DF',RB:'DF',LWB:'DF',RWB:'DF',GK:'GK'};
+const W={FW:[.30,.15,.10,.05,.10,.20,.10],
+         MF:[.15,.20,.20,.15,.10,.15,.05],
+         DF:[.05,.08,.10,.35,.20,.15,.07]};
+const METRICS=['Голы','Ассисты','Ключевые передачи','Отборы + Перехваты',
+               'Выигранные дуэли','Рейтинг SofaScore','Сыгранные минуты'];
+/* отборы и перехваты источник по КПЛ не публикует → метрика недоступна */
+const AVAIL=[1,1,1,0,1,1,1];
+const MIN_MINUTES=450;
+const CATS=[['Сильно недооценён','pos'],['Недооценён','pos'],['Справедливо оценён','ntr'],
+            ['Переоценён','wrn'],['Сильно переоценён','neg']];
+
+const idx={}; FIELDS.forEach((f,i)=>idx[f]=i);
+const P=ROWS.map(r=>{
+  const o={}; FIELDS.forEach((f,i)=>o[f]=r[i]);
+  o.group=GROUP[o.pos]||'?';
+  o.excl=null;
+  if(o.group==='GK') o.excl='Вратарь — вне модели по методологии';
+  else if(o.group==='?') o.excl='Позиция не распознана';
+  else if(o.mv===null||o.mv===undefined) o.excl='Нет рыночной стоимости на дату среза';
+  else if(o.minutes<MIN_MINUTES) o.excl='Сыграно '+o.minutes+' мин — меньше порога '+MIN_MINUTES;
+  o.inModel=!o.excl;
+  /* производные на 90 минут */
+  const n90=o.minutes/90;
+  o.g90=n90>0?o.goals/n90:null;
+  o.a90=n90>0?o.assists/n90:null;
+  o.kp90=n90>0?o.key_passes/n90:null;
+  o.d90=n90>0?o.duels_won/n90:null;
+  o.metrics=[o.goals,o.assists,o.key_passes,0,o.duels_won,o.rating,o.minutes];
+  return o;
+});
+
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const sdev=a=>{if(a.length<2)return 0;const m=mean(a);
+  return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));};
+const median=a=>{if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),h=b.length>>1;
+  return b.length%2?b[h]:(b[h-1]+b[h])/2;};
+
+/* эффективные веса: вес недоступной метрики перераспределяется на собранные */
+const WEFF={}, COVER={};
+for(const g of['FW','MF','DF']){
+  const den=W[g].reduce((s,w,i)=>s+w*AVAIL[i],0);
+  WEFF[g]=W[g].map((w,i)=>w*AVAIL[i]/den);
+  COVER[g]=den;
+}
+const MODEL=P.filter(p=>p.inModel);
+const ST={};
+for(const g of['FW','MF','DF']){
+  const sub=MODEL.filter(p=>p.group===g);
+  ST[g]={n:sub.length,
+    mu:METRICS.map((_,i)=>mean(sub.map(p=>p.metrics[i]))),
+    sd:METRICS.map((_,i)=>sdev(sub.map(p=>p.metrics[i])))};
+}
+for(const p of MODEL){
+  const s=ST[p.group];
+  p.z=p.metrics.map((x,i)=>s.sd[i]===0?0:(x-s.mu[i])/s.sd[i]);
+  p.contrib=p.z.map((z,i)=>WEFF[p.group][i]*z);
+  p.kvi=p.contrib.reduce((a,b)=>a+b,0);
+  const a=p.age;
+  p.aaf=a<25?1+0.05*(25-a)/10:(a<=29?1:1-0.03*(a-29)/10);
+  p.kvi_adj=p.kvi*p.aaf;
+}
+for(const g of['FW','MF','DF']){
+  const sub=MODEL.filter(p=>p.group===g);
+  const mk=mean(sub.map(p=>p.kvi_adj)), sk=sdev(sub.map(p=>p.kvi_adj));
+  const mv=mean(sub.map(p=>p.mv)),      sv=sdev(sub.map(p=>p.mv));
+  ST[g].mk=mk; ST[g].sk=sk; ST[g].mmv=mv; ST[g].smv=sv;
+  for(const p of sub){
+    p.nk=(p.kvi_adj-mk)/sk;
+    p.nmv=(p.mv-mv)/sv;
+    p.ui=p.nk-p.nmv;
+    p.cat=p.ui>1?'Сильно недооценён':p.ui>0.5?'Недооценён':
+          p.ui>=-0.5?'Справедливо оценён':p.ui>=-1?'Переоценён':'Сильно переоценён';
+  }
+  /* ранг внутри позиционной группы */
+  [...sub].sort((x,y)=>y.ui-x.ui).forEach((p,i)=>{p.rankGrp=i+1;p.rankGrpN=sub.length;});
+}
+[...MODEL].sort((a,b)=>b.ui-a.ui).forEach((p,i)=>{p.rankAll=i+1;});
+[...MODEL].sort((a,b)=>b.kvi_adj-a.kvi_adj).forEach((p,i)=>{p.rankKvi=i+1;});
+
+function pearson(xs,ys){
+  const n=xs.length; if(n<3) return null;
+  const mx=mean(xs), my=mean(ys);
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){const a=xs[i]-mx,b=ys[i]-my;sxy+=a*b;sxx+=a*a;syy+=b*b;}
+  return (sxx===0||syy===0)?null:sxy/Math.sqrt(sxx*syy);
+}
+const R_ALL=pearson(MODEL.map(p=>p.nk),MODEL.map(p=>p.nmv));
+/* ══════════ форматирование ══════════ */
+const NB=' ';
+const f2=x=>x==null?'—':x.toFixed(2);
+const f3=x=>x==null?'—':(x>0?'+':'')+x.toFixed(3);
+const fInt=x=>x==null?'—':Math.round(x).toLocaleString('ru-RU').replace(/ /g,NB);
+const fEur=x=>x==null?'—':fInt(x)+NB+'€';
+const fEurS=x=>x==null?'—':(x>=1e6?(x/1e6).toFixed(2).replace('.',',')+NB+'млн':Math.round(x/1000)+NB+'тыс')+NB+'€';
+const catCls=c=>({'Сильно недооценён':'pos','Недооценён':'pos','Справедливо оценён':'ntr',
+                  'Переоценён':'wrn','Сильно переоценён':'neg'}[c]||'ntr');
+const catColor=c=>({'Сильно недооценён':'#3FBF7F','Недооценён':'#2E8C63','Справедливо оценён':'#6B7788',
+                    'Переоценён':'#E0A33E','Сильно переоценён':'#F0645B'}[c]||'#6B7788');
+const plural=(n,a,b,c)=>{const m=Math.abs(n)%100,d=m%10;
+  return (m>10&&m<20)?c:(d>1&&d<5)?b:(d===1)?a:c;};
+const el=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SVGNS='http://www.w3.org/2000/svg';
+function mk(tag,attrs,parent){
+  const n=document.createElementNS(SVGNS,tag);
+  for(const k in attrs) n.setAttribute(k,attrs[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+
+/* ══════════ состояние ══════════ */
+const S={grp:'ALL',club:'',q:'',age:40,mv:1500000,cat:'',
+         sort:'ui',dir:-1,sel:null,cmpMode:false,cmpA:null,cmpB:null};
+
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  return P.filter(p=>{
+    if(S.grp!=='ALL'&&p.group!==S.grp) return false;
+    if(S.club&&p.club!==S.club) return false;
+    if(p.age>S.age) return false;
+    if(p.mv!=null&&p.mv>S.mv) return false;
+    if(S.mv<1500000&&p.mv==null) return false;
+    if(S.cat&&p.cat!==S.cat) return false;
+    if(q&&!(p.name.toLowerCase().includes(q)||p.club.toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+
+/* ══════════ шапка и боковая панель ══════════ */
+function renderSide(rows){
+  const m=rows.filter(p=>p.inModel);
+  el('f-n').textContent=MODEL.length;
+  el('f-r').innerHTML=R_ALL.toFixed(3)+'<small>всего</small>';
+  el('f-total').textContent=P.length;
+  el('f-med').textContent=fEurS(median(MODEL.map(p=>p.mv)));
+  const r=pearson(m.map(p=>p.nk),m.map(p=>p.nmv));
+  el('s-r').textContent=r==null?'—':r.toFixed(4);
+  el('s-n').textContent=m.length;
+  el('s-kvi').textContent=m.length?f2(median(m.map(p=>p.kvi_adj))):'—';
+  el('s-mv').textContent=m.length?fEurS(median(m.map(p=>p.mv))):'—';
+  el('s-age').textContent=m.length?mean(m.map(p=>p.age)).toFixed(1):'—';
+  el('side-n').textContent=m.length+' / '+MODEL.length;
+  el('sc-count').textContent=m.length+' точек';
+
+  const tot=m.length||1;
+  el('cats').innerHTML=CATS.map(([c])=>{
+    const n=m.filter(p=>p.cat===c).length;
+    return `<div class="catrow"><span class="cl">${c}</span>
+      <span class="cb"><i style="width:${(n/tot*100).toFixed(1)}%;background:${catColor(c)}"></i></span>
+      <span class="cn">${n}</span></div>`;}).join('');
+
+  el('cover').innerHTML=['FW','MF','DF'].map(g=>{
+    const pc=Math.round(COVER[g]*100);
+    return `<div class="cov"><span class="g">${g}</span>
+      <span class="track"><i style="width:${pc}%"></i><u style="width:${100-pc}%"></u></span>
+      <span class="p">${pc}${NB}%</span></div>`;}).join('');
+}
+
+/* ══════════ scatter ══════════ */
+const SC={w:820,h:470,l:56,r:20,t:16,b:46};
+function niceStep(span){
+  const raw=span/7, pow=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/pow;
+  return (n<=1?1:n<=1.5?1:n<=3?2:n<=7?5:10)*pow;
+}
+function renderScatter(rows){
+  const svg=el('scatter'); svg.textContent='';
+  const m=rows.filter(p=>p.inModel);
+  const iw=SC.w-SC.l-SC.r, ih=SC.h-SC.t-SC.b;
+  /* пределы по фактическим данным всей модели — шкала не скачет при фильтрации */
+  const xs=MODEL.map(p=>p.nmv), ys=MODEL.map(p=>p.nk);
+  const pad=(a,b)=>{const d=(b-a)||1; return [a-d*0.06,b+d*0.06];};
+  const [x0,x1]=pad(Math.min(...xs),Math.max(...xs));
+  const [y0,y1]=pad(Math.min(...ys),Math.max(...ys));
+  const X=v=>SC.l+(v-x0)/(x1-x0)*iw, Y=v=>SC.t+ih-(v-y0)/(y1-y0)*ih;
+
+  /* квадрант: высокая эффективность при цене ниже средней по группе */
+  const qx=Math.max(SC.l,X(x0)), qw=Math.min(X(0),SC.l+iw)-qx;
+  const qy=SC.t, qh=Math.max(0,Math.min(Y(0),SC.t+ih)-SC.t);
+  const reserved=[];
+  if(qw>0&&qh>0){
+    mk('rect',{x:qx,y:qy,width:qw,height:qh,class:'quad'},svg);
+    mk('text',{x:qx+9,y:qy+16,class:'quadlab'},svg).textContent='зона недооценённости';
+    reserved.push({x:qx+9,y:qy+16,w:158,h:13});
+  }
+  const sx=niceStep(x1-x0), sy=niceStep(y1-y0);
+  for(let v=Math.ceil(x0/sx)*sx; v<=x1+1e-9; v+=sx){
+    const vv=Math.abs(v)<1e-9?0:v;
+    mk('line',{x1:X(vv),y1:SC.t,x2:X(vv),y2:SC.t+ih,class:'gridline'+(vv===0?' zero':'')},svg);
+    mk('text',{x:X(vv),y:SC.t+ih+16,class:'axlab','text-anchor':'middle'},svg)
+      .textContent=(Math.round(vv*10)/10).toString().replace('.',',');
+  }
+  for(let v=Math.ceil(y0/sy)*sy; v<=y1+1e-9; v+=sy){
+    const vv=Math.abs(v)<1e-9?0:v;
+    mk('line',{x1:SC.l,y1:Y(vv),x2:SC.l+iw,y2:Y(vv),class:'gridline'+(vv===0?' zero':'')},svg);
+    mk('text',{x:SC.l-9,y:Y(vv)+3.5,class:'axlab','text-anchor':'end'},svg)
+      .textContent=(Math.round(vv*10)/10).toString().replace('.',',');
+  }
+  mk('text',{x:SC.l+iw/2,y:SC.h-9,class:'axtitle','text-anchor':'middle'},svg)
+    .textContent='рыночная стоимость, z внутри группы';
+  mk('text',{x:14,y:SC.t+ih/2,class:'axtitle','text-anchor':'middle',
+    transform:`rotate(-90 14 ${SC.t+ih/2})`},svg)
+    .textContent='эффективность KVI_adj, z внутри группы';
+
+  if(m.length>2){
+    const mx=mean(m.map(p=>p.nmv)), my=mean(m.map(p=>p.nk));
+    let sxy=0,sxx=0;
+    m.forEach(p=>{sxy+=(p.nmv-mx)*(p.nk-my);sxx+=(p.nmv-mx)**2;});
+    if(sxx>0){const b=sxy/sxx,a=my-b*mx;
+      mk('line',{x1:X(x0),y1:Y(a+b*x0),x2:X(x1),y2:Y(a+b*x1),class:'trend'},svg);}
+  }
+
+  const set=new Set(m.map(p=>p.n));
+  const g=mk('g',{},svg);
+  for(const p of MODEL){
+    const on=set.has(p.n);
+    const node=mk('g',{class:'pt'+(on?'':' dim')+(S.sel===p.n?' sel':''),tabindex:on?0:-1},g);
+    const rr=p.minutes>=1800?5.2:p.minutes>=1200?4.4:3.7;
+    mk('circle',{cx:X(p.nmv),cy:Y(p.nk),r:rr,fill:catColor(p.cat),
+      'fill-opacity':on?0.8:0.45},node);
+    if(on){
+      node.addEventListener('mouseenter',e=>showTip(e,p));
+      node.addEventListener('mousemove',moveTip);
+      node.addEventListener('mouseleave',hideTip);
+      node.addEventListener('click',()=>pick(p));
+      node.addEventListener('keydown',e=>{if(e.key==='Enter')pick(p);});
+    }
+  }
+  /* подписи верхних значений UI, с уходом от наложений */
+  const placed=reserved.slice();
+  const cand=[...m].sort((a,b)=>b.ui-a.ui).slice(0,7);
+  for(const p of cand){
+    const nm=p.name.split(' ').slice(-1)[0];
+    const w=nm.length*5.6+4, h=12;
+    let best=null;
+    for(const [dx,dy] of [[8,-8],[8,12],[-8-w,-8],[-8-w,12],[8,-20],[-8-w,-20]]){
+      const bx=X(p.nmv)+dx, by=Y(p.nk)+dy;
+      if(bx<SC.l+2||bx+w>SC.l+iw-2||by-h<SC.t||by>SC.t+ih) continue;
+      const hit=placed.some(q=>!(bx+w<q.x||q.x+q.w<bx||by<q.y-q.h||q.y<by-h));
+      if(!hit){best={x:bx,y:by,w,h};break;}
+    }
+    if(!best) continue;
+    placed.push(best);
+    mk('text',{x:best.x,y:best.y,class:'ptlab halo'},svg).textContent=nm;
+    mk('text',{x:best.x,y:best.y,class:'ptlab'},svg).textContent=nm;
+  }
+}
+const tip=el('tip');
+function showTip(e,p){
+  tip.innerHTML=`<div class="n">${esc(p.name)}</div>
+    <div class="sub">${p.pos} · ${esc(p.club)} · ${p.age}${NB}${plural(p.age,'год','года','лет')}</div>
+    <div class="r"><span>KVI_adj</span><b>${f2(p.kvi_adj)}</b></div>
+    <div class="r"><span>Стоимость</span><b>${fEurS(p.mv)}</b></div>
+    <div class="r"><span>UI</span><b style="color:${catColor(p.cat)}">${f3(p.ui)}</b></div>`;
+  tip.classList.add('on'); moveTip(e);
+}
+function moveTip(e){
+  const pad=14, w=tip.offsetWidth, h=tip.offsetHeight;
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+w>innerWidth-8) x=e.clientX-w-pad;
+  if(y+h>innerHeight-8) y=e.clientY-h-pad;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hideTip(){tip.classList.remove('on');}
+
+/* ══════════ распределение KVI_adj ══════════ */
+function renderDist(rows){
+  const svg=el('dist'); svg.textContent='';
+  const m=rows.filter(p=>p.inModel);
+  const W_=312,H=168,L=30,R=8,T=10,B=26, iw=W_-L-R;
+  const groups=['FW','MF','DF'], rowH=(H-T-B)/3;
+  const lo=-3, hi=3, X=v=>L+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*iw;
+  for(let v=lo;v<=hi;v++){
+    mk('line',{x1:X(v),y1:T,x2:X(v),y2:H-B,class:'gridline'+(v===0?' zero':'')},svg);
+    mk('text',{x:X(v),y:H-B+13,class:'axlab','text-anchor':'middle'},svg).textContent=v;
+  }
+  groups.forEach((g,i)=>{
+    const y=T+rowH*i+rowH/2;
+    mk('text',{x:6,y:y+3.5,class:'axlab'},svg).textContent=g;
+    const sub=m.filter(p=>p.group===g);
+    if(!sub.length) return;
+    const vals=sub.map(p=>p.kvi_adj).sort((a,b)=>a-b);
+    const q=f=>{const pos=(vals.length-1)*f,b=Math.floor(pos),r=pos-b;
+      return vals[b+1]!==undefined?vals[b]+r*(vals[b+1]-vals[b]):vals[b];};
+    /* усы 10–90 перцентиль, коробка 25–75, медиана */
+    mk('line',{x1:X(q(.1)),y1:y,x2:X(q(.9)),y2:y,stroke:'var(--rule-2)','stroke-width':1},svg);
+    mk('rect',{x:X(q(.25)),y:y-7,width:Math.max(1,X(q(.75))-X(q(.25))),height:14,
+      fill:'var(--surface-2)',stroke:'var(--rule-2)'},svg);
+    sub.forEach(p=>mk('circle',{cx:X(p.kvi_adj),cy:y,r:2,fill:catColor(p.cat),
+      'fill-opacity':.5},svg));
+    mk('line',{x1:X(q(.5)),y1:y-9,x2:X(q(.5)),y2:y+9,stroke:'var(--ink)','stroke-width':1.6},svg);
+  });
+  mk('text',{x:L+iw/2,y:H-4,class:'axtitle','text-anchor':'middle'},svg).textContent='KVI_adj';
+}
+/* ══════════ таблица ══════════ */
+const COLS=[
+ {k:'rankAll',t:'#',r:1,w:'44px',f:p=>p.inModel?p.rankAll:'—'},
+ {k:'name',t:'Игрок',f:p=>esc(p.name)+(p.inModel?'':' <span class="tag">вне модели</span>')},
+ {k:'pos',t:'Поз',f:p=>`<span class="tag">${p.pos}</span>`},
+ {k:'club',t:'Клуб',f:p=>esc(p.club)},
+ {k:'age',t:'Возр',r:1,f:p=>p.age},
+ {k:'minutes',t:'Мин',r:1,f:p=>fInt(p.minutes)},
+ {k:'goals',t:'Г',r:1,f:p=>p.goals},
+ {k:'assists',t:'А',r:1,f:p=>p.assists},
+ {k:'key_passes',t:'КП',r:1,f:p=>p.key_passes},
+ {k:'rating',t:'Рейтинг',r:1,f:p=>p.rating.toFixed(2)},
+ {k:'mv',t:'Стоимость',r:1,f:p=>p.mv==null?'—':fEur(p.mv)},
+ {k:'kvi_adj',t:'KVI_adj',r:1,f:p=>p.inModel?f2(p.kvi_adj):'—'},
+ {k:'ui',t:'UI',r:1,f:p=>p.inModel?f3(p.ui):'—'},
+ {k:'cat',t:'Статус',f:p=>p.inModel
+     ?`<span class="pill ${catCls(p.cat)}">${p.cat}</span>`
+     :`<span class="pill ntr" title="${esc(p.excl)}">исключён</span>`},
+];
+function renderHead(){
+  el('thr').innerHTML=COLS.map(c=>
+    `<th data-k="${c.k}" class="${c.r?'r':''}"${c.w?` style="width:${c.w}"`:''}>${c.t}`+
+    (S.sort===c.k?`<span class="ar">${S.dir<0?'↓':'↑'}</span>`:'')+`</th>`).join('');
+  el('thr').querySelectorAll('th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;
+    if(S.sort===k) S.dir=-S.dir;
+    else {S.sort=k; S.dir=(k==='name'||k==='club'||k==='pos'||k==='cat')?1:-1;}
+    draw();
+  });
+}
+function renderTable(rows){
+  const k=S.sort,d=S.dir;
+  const sorted=[...rows].sort((a,b)=>{
+    let x=a[k],y=b[k];
+    if(x==null&&y==null)return 0;
+    if(x==null)return 1; if(y==null)return -1;
+    if(typeof x==='string')return d*x.localeCompare(y,'ru');
+    return d*(x-y);
+  });
+  el('tb').innerHTML=sorted.map(p=>
+    `<tr data-n="${p.n}" class="${p.inModel?'':'out'}${S.sel===p.n?' sel':''}">`+
+    COLS.map(c=>`<td class="${c.r?'r':''}">${c.f(p)}</td>`).join('')+`</tr>`).join('');
+  el('tb').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>
+    pick(P.find(x=>x.n===+tr.dataset.n)));
+  el('tb-count').textContent=rows.length+' из '+P.length;
+}
+
+/* ══════════ радар: z-профиль игрока против среднего по группе ══════════ */
+const R_SHORT=['Голы','Ассисты','Кл. пас','Отб+Пер','Дуэли','Рейтинг','Минуты'];
+function radarSVG(p){
+  const S_=240,c=S_/2,R=78,N=7,LIM=2.5;
+  const ang=i=>-Math.PI/2+i*2*Math.PI/N;
+  const rad=z=>{const v=Math.max(-LIM,Math.min(LIM,z));return R*(v+LIM)/(2*LIM);};
+  let s=`<svg viewBox="0 0 ${S_} ${S_}" role="img" aria-label="Профиль z-оценок">`;
+  for(const f of[.25,.5,.75,1]){
+    const pts=[...Array(N)].map((_,i)=>
+      `${(c+R*f*Math.cos(ang(i))).toFixed(1)},${(c+R*f*Math.sin(ang(i))).toFixed(1)}`).join(' ');
+    s+=`<polygon points="${pts}" class="rring${f===.5?' base':''}"/>`;
+  }
+  for(let i=0;i<N;i++)
+    s+=`<line x1="${c}" y1="${c}" x2="${(c+R*Math.cos(ang(i))).toFixed(1)}"
+         y2="${(c+R*Math.sin(ang(i))).toFixed(1)}" class="rax"/>`;
+  const pts=p.z.map((z,i)=>{
+    const rr=AVAIL[i]===0?rad(0):rad(z);
+    return `${(c+rr*Math.cos(ang(i))).toFixed(1)},${(c+rr*Math.sin(ang(i))).toFixed(1)}`;}).join(' ');
+  s+=`<polygon points="${pts}" class="rpoly"/>`;
+  p.z.forEach((z,i)=>{
+    if(AVAIL[i]===0) return;
+    const rr=rad(z);
+    s+=`<circle cx="${(c+rr*Math.cos(ang(i))).toFixed(1)}"
+         cy="${(c+rr*Math.sin(ang(i))).toFixed(1)}" r="2.6" class="rdot"/>`;});
+  for(let i=0;i<N;i++){
+    const lx=c+(R+15)*Math.cos(ang(i)), ly=c+(R+15)*Math.sin(ang(i));
+    const anch=Math.abs(lx-c)<6?'middle':(lx>c?'start':'end');
+    s+=`<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="${anch}"
+         class="rlab${AVAIL[i]===0?' na':''}">${R_SHORT[i]}</text>`;}
+  return s+'</svg>';
+}
+
+/* ══════════ карточка игрока ══════════ */
+function kvLine(k,v,cmp,cls){
+  return `<div class="kv"><span>${k}</span><b>${v}${cmp?`<i class="${cls||''}">${cmp}</i>`:''}</b></div>`;
+}
+function cardHTML(p){
+  if(!p) return '<div class="empty">Игрок не выбран</div>';
+  const link=`https://www.sofascore.com/player/${p.slug}/${p.sf_id}`;
+  const head=`<div class="dhead">
+    <div class="nm">${esc(p.name)}</div>
+    <div class="mt">${p.pos} · ${p.group} · ${esc(p.club)} · ${p.age}${NB}${plural(p.age,'год','года','лет')}
+      · ${esc(p.nat||'—')} · <a href="${link}" target="_blank" rel="noopener">SofaScore ↗</a></div>
+    <div class="row">
+      ${p.inModel?`<div><div class="uik">Undervaluation Index</div>
+        <div class="uiv" style="color:${catColor(p.cat)}">${f3(p.ui)}</div></div>
+        <div style="margin-bottom:4px"><span class="pill ${catCls(p.cat)}">${p.cat}</span></div>
+        <div style="margin-left:auto;text-align:right">
+          <div class="uik">Ранг по UI</div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:600">
+            ${p.rankAll}<span style="color:var(--tx-4)"> / ${MODEL.length}</span></div></div>`
+      :`<div><div class="uik">Вне модели</div>
+         <div class="uiv" style="color:var(--tx-4)">—</div></div>
+         <div style="margin-bottom:4px"><span class="pill ntr">исключён</span></div>`}
+    </div></div>`;
+  if(!p.inModel) return head+`<div class="dsec"><h3>Причина исключения</h3>
+    <p style="margin:0;font-size:12.5px;color:var(--tx-2)">${esc(p.excl)}.</p>
+    <p style="margin:8px 0 0;font-size:11px;color:var(--tx-4)">
+      Показатели собраны, но рейтинг модели не рассчитывается — значения не подменялись.</p></div>`+
+    `<div class="dsec"><h3>Собранные показатели</h3><div class="g2">
+      ${kvLine('Минуты',fInt(p.minutes))}${kvLine('Матчей',p.apps)}
+      ${kvLine('Голы',p.goals)}${kvLine('Ассисты',p.assists)}
+      ${kvLine('Ключевые передачи',p.key_passes)}${kvLine('Выигранные дуэли',p.duels_won)}
+      ${kvLine('Дриблинги',p.dribbles)}${kvLine('Рейтинг',p.rating.toFixed(2))}
+      ${kvLine('Точность пасов',p.pass_pct.toFixed(1)+'%')}
+      ${kvLine('Стоимость',p.mv==null?'нет данных':fEur(p.mv))}</div></div>`;
+  const st=ST[p.group];
+  const vs=(val,mu,dec)=>{const d=val-mu;
+    return {t:(d>=0?'+':'')+(Math.abs(d)>=10?d.toFixed(0):d.toFixed(dec==null?2:dec)),c:d>=0?'up':'dn'};};
+  const V=(val,mu,dec)=>{const o=vs(val,mu,dec);return[o.t+' к ср.',o.c];};
+  const [g1,g1c]=V(p.goals,st.mu[0]), [a1,a1c]=V(p.assists,st.mu[1]);
+  const [k1,k1c]=V(p.key_passes,st.mu[2]), [d1,d1c]=V(p.duels_won,st.mu[4],0);
+  const [r1,r1c]=V(p.rating,st.mu[5]), [m1,m1c]=V(p.minutes,st.mu[6],0);
+  const stats=`<div class="dsec"><h3>Показатели сезона и сравнение со средним по группе ${p.group}</h3>
+    <div class="g2">
+      ${kvLine('Минуты',fInt(p.minutes),m1,m1c)}${kvLine('Матчей / в старте',p.apps+' / '+p.starts)}
+      ${kvLine('Голы',p.goals,g1,g1c)}${kvLine('Голы / 90',f2(p.g90))}
+      ${kvLine('Ассисты',p.assists,a1,a1c)}${kvLine('Ассисты / 90',f2(p.a90))}
+      ${kvLine('Ключевые передачи',p.key_passes,k1,k1c)}${kvLine('Кл. передачи / 90',f2(p.kp90))}
+      ${kvLine('Выигранные дуэли',p.duels_won,d1,d1c)}${kvLine('Дуэли / 90',f2(p.d90))}
+      ${kvLine('Успешные дриблинги',p.dribbles)}${kvLine('Точность пасов',p.pass_pct.toFixed(1)+'%')}
+      ${kvLine('Рейтинг SofaScore',p.rating.toFixed(2),r1,r1c)}
+      ${kvLine('Дата рождения',p.dob.split('-').reverse().join('.'))}
+    </div></div>`;
+  const model=`<div class="dsec"><h3>Модель</h3><div class="g2">
+      ${kvLine('KVI',f2(p.kvi))}${kvLine('AAF (возраст)',p.aaf.toFixed(3))}
+      ${kvLine('KVI_adj',f2(p.kvi_adj))}${kvLine('Стоимость',fEur(p.mv))}
+      ${kvLine('норм. KVI_adj',f2(p.nk))}${kvLine('норм. стоимость',f2(p.nmv))}
+      ${kvLine('Ранг по UI в '+p.group,p.rankGrp+' / '+p.rankGrpN)}
+      ${kvLine('Ранг по KVI_adj',p.rankKvi+' / '+MODEL.length)}
+    </div></div>`;
+  const radar=`<div class="dsec"><h3>Профиль z-оценок внутри группы ${p.group}</h3>
+    <div class="radarwrap">${radarSVG(p)}
+      <div class="rlegend">
+        <div><b style="background:var(--pos)"></b>показатели игрока</div>
+        <div><b style="background:var(--line-2)"></b>средний уровень группы (z = 0)</div>
+        <div style="margin-top:7px;color:var(--tx-4)">Шкала от −2,5 до +2,5σ.<br>
+          «Отб+Пер» выведен на нулевую линию:<br>метрика источником не публикуется.</div>
+      </div></div></div>`;
+  const maxAbs=Math.max(...p.contrib.map(Math.abs),0.01);
+  const bars=METRICS.map((nm,i)=>{
+    const c=p.contrib[i], pct=Math.abs(c)/maxAbs*50, off=c>=0?50:50-pct, na=AVAIL[i]===0;
+    return `<div class="dbar">
+      <span class="l">${nm}${na?' <span class="tag">нет данных</span>':''}</span>
+      <span class="ax"><span class="mid"></span>
+        <i style="left:${off}%;width:${na?0:pct}%;background:${c>=0?'var(--pos)':'var(--neg)'}"></i></span>
+      <span class="v">${na?'—':(c>=0?'+':'')+c.toFixed(3)}</span></div>`;}).join('');
+  const dec=`<div class="dsec"><h3>Из чего сложился индекс — вклад wᵢ × zᵢ</h3>${bars}
+    <div class="dbar tot"><span class="l">KVI (сумма)</span><span class="ax"></span>
+      <span class="v">${(p.kvi>=0?'+':'')+p.kvi.toFixed(3)}</span></div>
+    <p style="margin:8px 0 0;font-size:10.5px;color:var(--tx-4);line-height:1.55">
+      Вклад = вес показателя × его z-оценка внутри группы ${p.group}. Вес отборов и перехватов
+      перераспределён между собранными метриками, покрытие группы
+      ${Math.round(COVER[p.group]*100)}%.</p></div>`;
+  return head+radar+dec+stats+model;
+}
+function renderDrawer(){
+  const dr=el('drawer'), body=el('dbody');
+  if(S.cmpMode){
+    const a=P.find(x=>x.n===S.cmpA), b=P.find(x=>x.n===S.cmpB);
+    dr.classList.add('wide');
+    body.innerHTML=`<div class="cmpgrid">
+      <div>${a?cardHTML(a):'<div class="empty">Слот A пуст<br><span style="font-size:11px">выберите игрока в таблице</span></div>'}</div>
+      <div>${b?cardHTML(b):'<div class="empty">Слот B пуст<br><span style="font-size:11px">выберите второго игрока</span></div>'}</div>
+    </div>`;
+    setOpen(!!(a||b));
+  }else{
+    dr.classList.remove('wide');
+    const p=P.find(x=>x.n===S.sel);
+    body.innerHTML=cardHTML(p);
+    setOpen(!!p);
+  }
+}
+function setOpen(on){
+  el('drawer').classList.toggle('on',on);
+  el('scrim').classList.toggle('on',on);
+}
+function closeDrawer(){
+  S.sel=null; if(S.cmpMode){S.cmpA=null;S.cmpB=null;}
+  setOpen(false); draw();
+}
+function pick(p){
+  if(!p) return;
+  if(S.cmpMode){
+    if(S.cmpA==null||S.cmpA===p.n) S.cmpA=p.n;
+    else if(S.cmpB===p.n) S.cmpB=null;
+    else S.cmpB=p.n;
+  } else S.sel=S.sel===p.n?null:p.n;
+  draw();
+}
+/* ══════════ отрисовка и события ══════════ */
+let tId=null;
+function drawNow(){
+  const rows=filtered();
+  renderSide(rows); renderScatter(rows); renderDist(rows);
+  renderHead(); renderTable(rows); renderDrawer();
+  tId=null;
+}
+/* коалесцируем частые события (ползунки, ввод), но не зависим от видимости вкладки */
+function draw(){ if(tId) clearTimeout(tId); tId=setTimeout(drawNow,0); }
+(function init(){
+  const clubs=[...new Set(P.map(p=>p.club))].sort((a,b)=>a.localeCompare(b,'ru'));
+  el('club').innerHTML='<option value="">Все клубы ('+clubs.length+')</option>'+
+    clubs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  el('cat').innerHTML='<option value="">Любая</option>'+
+    CATS.map(([c])=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+
+  el('q').addEventListener('input',e=>{S.q=e.target.value;draw();});
+  el('club').addEventListener('change',e=>{S.club=e.target.value;draw();});
+  el('cat').addEventListener('change',e=>{S.cat=e.target.value;draw();});
+  el('age').addEventListener('input',e=>{
+    S.age=+e.target.value; el('age-out').textContent='до '+S.age; draw();});
+  el('mv').addEventListener('input',e=>{
+    S.mv=+e.target.value;
+    el('mv-out').textContent='до '+(S.mv>=1e6?(S.mv/1e6).toFixed(2).replace('.',',')+' млн':
+      Math.round(S.mv/1000)+' тыс')+' €';
+    draw();});
+  el('seg-grp').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    S.grp=b.dataset.g;
+    el('seg-grp').querySelectorAll('button').forEach(x=>
+      x.setAttribute('aria-pressed',String(x===b)));
+    draw();});
+  el('cmp-btn').onclick=()=>{
+    S.cmpMode=!S.cmpMode;
+    el('cmp-btn').setAttribute('aria-pressed',String(S.cmpMode));
+    if(S.cmpMode){S.cmpA=S.sel;S.cmpB=null;} else {S.cmpA=S.cmpB=null;}
+    draw();};
+  el('dclose').onclick=closeDrawer;
+  el('scrim').onclick=closeDrawer;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+  el('reset').onclick=()=>{
+    S.grp='ALL';S.club='';S.q='';S.age=40;S.mv=1500000;S.cat='';
+    S.sel=null;S.cmpA=S.cmpB=null;S.cmpMode=false;
+    el('q').value='';el('club').value='';el('cat').value='';
+    el('age').value=40;el('age-out').textContent='до 40';
+    el('mv').value=1500000;el('mv-out').textContent='до 1,50 млн €';
+    el('cmp-btn').setAttribute('aria-pressed','false'); setOpen(false);
+    el('seg-grp').querySelectorAll('button').forEach(x=>
+      x.setAttribute('aria-pressed',String(x.dataset.g==='ALL')));
+    draw();};
+
+  drawNow();
+
+  /* самопроверка модели — в консоль */
+  const cnt={}; CATS.forEach(([c])=>cnt[c]=MODEL.filter(p=>p.cat===c).length);
+  console.log('%cKVI self-check','font-weight:bold',{
+    'игроков в базе':P.length,'в модели':MODEL.length,
+    'r (Пирсон)':R_ALL.toFixed(6),
+    'категории':CATS.map(([c])=>cnt[c]).join(' / '),
+    'покрытие FW/MF/DF':['FW','MF','DF'].map(g=>Math.round(COVER[g]*100)+'%').join(' / '),
+    'n по группам':['FW','MF','DF'].map(g=>g+':'+ST[g].n).join(' ')});
+  window.__KVI={P,MODEL,ST,R_ALL,COVER,WEFF};
+})();
+</script>
+</body>
+</html>
